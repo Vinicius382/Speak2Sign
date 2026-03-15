@@ -23,7 +23,6 @@ interface UsuarioResposta {
   id: number;
   nome: string;
   email: string;
-  senha: string;
 }
 
 export const loginUsuario = async (payload: LoginPayload): Promise<UsuarioResposta> => {
