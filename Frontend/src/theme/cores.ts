@@ -8,14 +8,14 @@ export const cores = {
   textoSecundario: '#6C757D',
   textoSuave: '#ADB5BD',
   
-  // Botão principal (gradiente verde escuro)
+  // Botão principal 
   primarioInicio: '#43A047',
   primarioFim: '#1B5E20',
   
   // Links e destaques
   destaque: '#2E7D32',
   
-  // Ícone da tradução (teal do ícone de mãos)
+  // Ícone da tradução
   iconeTeal: '#5BA4A4',
   
   // Inputs
