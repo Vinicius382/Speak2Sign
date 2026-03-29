@@ -79,11 +79,12 @@ const TelaLogin: React.FC<TelaLoginProps> = ({ navigation }) => {
       >
         <View style={estilos.espacoTopo} />
 
-        <CabecalhoAutenticacao subtitulo="Seja Bem Vindo" />
+        <CabecalhoAutenticacao subtitulo="Seja Bem Vindo de Volta" />
 
         <View style={estilos.containerFormulario}>
           <EntradaPersonalizada
             placeholder="Email"
+            textoPlaceholder="Digite seu email"
             valor={email}
             aoMudarTexto={setEmail}
             tipoTeclado="email-address"
@@ -93,6 +94,7 @@ const TelaLogin: React.FC<TelaLoginProps> = ({ navigation }) => {
 
           <EntradaPersonalizada
             placeholder="Senha"
+            textoPlaceholder="Digite sua senha"
             valor={senha}
             aoMudarTexto={setSenha}
             textoSeguro

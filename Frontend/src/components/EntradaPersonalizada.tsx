@@ -19,6 +19,7 @@ interface EntradaPersonalizadaProps {
   autoCapitalizar?: 'none' | 'sentences' | 'words' | 'characters';
   erro?: string;
   estilo?: ViewStyle;
+  textoPlaceholder?: string;
 }
 
 const EntradaPersonalizada: React.FC<EntradaPersonalizadaProps> = ({
@@ -30,6 +31,7 @@ const EntradaPersonalizada: React.FC<EntradaPersonalizadaProps> = ({
   autoCapitalizar = 'none',
   erro,
   estilo,
+  textoPlaceholder,
 }) => {
   const [estaFocado, setEstaFocado] = useState(false);
   const [senhaVisivel, setSenhaVisivel] = useState(false);
@@ -53,7 +55,7 @@ const EntradaPersonalizada: React.FC<EntradaPersonalizadaProps> = ({
           secureTextEntry={textoSeguro && !senhaVisivel}
           keyboardType={tipoTeclado}
           autoCapitalize={autoCapitalizar}
-          placeholder={`Digite seu ${placeholder.toLowerCase()}`}
+          placeholder={textoPlaceholder ?? placeholder}
           placeholderTextColor={cores.inputPlaceholder}
           onFocus={() => setEstaFocado(true)}
           onBlur={() => setEstaFocado(false)}

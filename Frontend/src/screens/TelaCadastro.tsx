@@ -97,11 +97,12 @@ const TelaCadastro: React.FC<TelaCadastroProps> = ({ navigation }) => {
       >
         <View style={estilos.espacoTopo} />
 
-        <CabecalhoAutenticacao subtitulo="Crie sua Conta" />
+        <CabecalhoAutenticacao subtitulo="Faça Seu Cadastro" />
 
         <View style={estilos.containerFormulario}>
           <EntradaPersonalizada
-            placeholder="Nome"
+            placeholder="Nome Completo"
+            textoPlaceholder="Seu Nome"
             valor={nome}
             aoMudarTexto={setNome}
             autoCapitalizar="words"
@@ -110,6 +111,7 @@ const TelaCadastro: React.FC<TelaCadastroProps> = ({ navigation }) => {
 
           <EntradaPersonalizada
             placeholder="Email"
+            textoPlaceholder="email@email.com"
             valor={email}
             aoMudarTexto={setEmail}
             tipoTeclado="email-address"
@@ -119,6 +121,7 @@ const TelaCadastro: React.FC<TelaCadastroProps> = ({ navigation }) => {
 
           <EntradaPersonalizada
             placeholder="Senha"
+            textoPlaceholder="Mínimo de 6 Caracteres"
             valor={senha}
             aoMudarTexto={setSenha}
             textoSeguro
@@ -127,6 +130,7 @@ const TelaCadastro: React.FC<TelaCadastroProps> = ({ navigation }) => {
 
           <EntradaPersonalizada
             placeholder="Confirmar Senha"
+            textoPlaceholder="Digite a senha novamente"
             valor={confirmarSenha}
             aoMudarTexto={setConfirmarSenha}
             textoSeguro
@@ -134,7 +138,7 @@ const TelaCadastro: React.FC<TelaCadastroProps> = ({ navigation }) => {
           />
 
           <BotaoPrincipal
-            titulo="Cadastrar"
+            titulo="Criar Conta"
             aoClicar={aoCadastrar}
             carregando={carregando}
             estilo={estilos.botao}
@@ -142,7 +146,7 @@ const TelaCadastro: React.FC<TelaCadastroProps> = ({ navigation }) => {
 
           <TextoLink
             texto="Já tem conta?"
-            textoLink="Entrar"
+            textoLink="Fazer Login"
             aoClicar={() => navigation.navigate('Login')}
             estilo={estilos.linkLogin}
           />
