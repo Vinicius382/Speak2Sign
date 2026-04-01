@@ -1,5 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../navigation/NavegacaoPrincipal';
 import { Ionicons } from '@expo/vector-icons';
 import { cores } from '../theme/cores';
 
@@ -21,13 +24,23 @@ const itens: ItemBarra[] = [
 ];
 
 const BarraInferior: React.FC<BarraInferiorProps> = ({ aoClicarItem }) => {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
+  const lidarComClique = (rotulo: string) => {
+    if (rotulo === 'Início') {
+      navigation.navigate('Inicial');
+      return;
+    }
+    aoClicarItem?.(rotulo);
+  };
+
   return (
     <View style={estilos.barraInferior}>
       {itens.map((item) => (
         <TouchableOpacity
           key={item.rotulo}
           style={estilos.itemBarra}
-          onPress={() => aoClicarItem?.(item.rotulo)}
+          onPress={() => lidarComClique(item.rotulo)}
         >
           <Ionicons
             name={item.icone}

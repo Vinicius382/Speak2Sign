@@ -6,6 +6,7 @@ import TelaInicial from '../screens/TelaInicial';
 import TelaNovaTraducao from '../screens/TelaNovaTraducao';
 import TelaDigitarMensagem from '../screens/TelaDigitarMensagem';
 import TelaResultadoLibras from '../screens/TelaResultadoLibras';
+import TelaFalarMensagem from '../screens/TelaFalarMensagem';
 
 export type RootStackParamList = {
   Login: undefined;
@@ -13,6 +14,7 @@ export type RootStackParamList = {
   Inicial: undefined;
   NovaTraducao: undefined;
   DigitarMensagem: undefined;
+  FalarMensagem: undefined;
   ResultadoLibras: { texto: string };
 };
 
@@ -36,6 +38,7 @@ const NavegacaoPrincipal: React.FC = () => {
       />
       <Stack.Screen name="NovaTraducao" component={TelaNovaTraducao} />
       <Stack.Screen name="DigitarMensagem" component={TelaDigitarMensagem} />
+      <Stack.Screen name="FalarMensagem" component={TelaFalarMensagem} />
       <Stack.Screen name="ResultadoLibras" component={TelaResultadoLibras} />
     </Stack.Navigator>
   );

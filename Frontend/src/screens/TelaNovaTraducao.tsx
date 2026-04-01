@@ -50,8 +50,7 @@ const TelaNovaTraducao: React.FC = () => {
         <TouchableOpacity
           style={estilos.cardMetodo}
           activeOpacity={0.7}
-          onPress={() => {
-          }}
+          onPress={() => navigation.navigate('FalarMensagem')}
         >
           <View style={estilos.iconeContainer}>
             <Ionicons name="mic-outline" size={48} color={cores.textoSecundario} />

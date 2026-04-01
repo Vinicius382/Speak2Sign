@@ -2,7 +2,7 @@
   "expo": {
     "name": "Speak2Sign",
     "slug": "Speak2Sign",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -26,7 +26,15 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-font"
+      "expo-font",
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "Permitir que o Speak2Sign use o microfone para reconhecimento de voz.",
+          "speechRecognitionPermission": "Permitir que o Speak2Sign use o reconhecimento de fala.",
+          "androidSpeechServicePackages": ["com.google.android.googlequicksearchbox"]
+        }
+      ]
     ],
     "extra": {
       "eas": {

@@ -23,6 +23,8 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 const mensagensSugeridas = [
   'Olá, Bom dia',
   'Como você está?',
+  'Por favor',
+  'Obrigado',
 ];
 
 const TelaDigitarMensagem: React.FC = () => {
@@ -99,17 +101,19 @@ const TelaDigitarMensagem: React.FC = () => {
           </View>
 
           {/* Botão Converter para Libras */}
-          <TouchableOpacity
-            style={[
-              estilos.botaoConverter,
-              !mensagem.trim() && estilos.botaoConverterDesabilitado,
-            ]}
-            onPress={converterParaLibras}
-            activeOpacity={0.8}
-            disabled={!mensagem.trim()}
-          >
-            <Text style={estilos.botaoConverterTexto}>Converter para Libras</Text>
-          </TouchableOpacity>
+          <View style={estilos.botaoContainer}>
+            <TouchableOpacity
+              style={[
+                estilos.botaoConverter,
+                !mensagem.trim() && estilos.botaoConverterDesabilitado,
+              ]}
+              onPress={converterParaLibras}
+              activeOpacity={0.8}
+              disabled={!mensagem.trim()}
+            >
+              <Text style={estilos.botaoConverterTexto}>Converter para Libras</Text>
+            </TouchableOpacity>
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
 
@@ -164,8 +168,9 @@ const estilos = StyleSheet.create({
     backgroundColor: cores.iconeTeal,
   },
   conteudoScroll: {
+    flexGrow: 1,
     paddingHorizontal: 20,
-    paddingBottom: 120,
+    paddingBottom: 100,
   },
   rotuloSugestoes: {
     fontSize: 14,
@@ -206,6 +211,10 @@ const estilos = StyleSheet.create({
     fontSize: 15,
     color: cores.textoPrincipal,
     minHeight: 140,
+  },
+  botaoContainer: {
+    marginTop: 'auto',
+    paddingTop: 10,
   },
   botaoConverter: {
     backgroundColor: cores.iconeTeal,
