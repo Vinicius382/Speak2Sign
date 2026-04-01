@@ -3,11 +3,17 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import TelaLogin from '../screens/TelaLogin';
 import TelaCadastro from '../screens/TelaCadastro';
 import TelaInicial from '../screens/TelaInicial';
+import TelaNovaTraducao from '../screens/TelaNovaTraducao';
+import TelaDigitarMensagem from '../screens/TelaDigitarMensagem';
+import TelaResultadoLibras from '../screens/TelaResultadoLibras';
 
 export type RootStackParamList = {
   Login: undefined;
   Cadastro: undefined;
   Inicial: undefined;
+  NovaTraducao: undefined;
+  DigitarMensagem: undefined;
+  ResultadoLibras: { texto: string };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -28,6 +34,9 @@ const NavegacaoPrincipal: React.FC = () => {
         component={TelaInicial}
         options={{ gestureEnabled: false }}
       />
+      <Stack.Screen name="NovaTraducao" component={TelaNovaTraducao} />
+      <Stack.Screen name="DigitarMensagem" component={TelaDigitarMensagem} />
+      <Stack.Screen name="ResultadoLibras" component={TelaResultadoLibras} />
     </Stack.Navigator>
   );
 };

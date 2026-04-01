@@ -8,10 +8,17 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../navigation/NavegacaoPrincipal';
 import { cores } from '../theme/cores';
 import BarraInferior from '../components/BarraInferior';
 
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+
 const TelaInicial: React.FC = () => {
+  const navigation = useNavigation<NavigationProp>();
+
   const avisoEmBreve = () => {
     Alert.alert('Em breve', 'Funcionalidade em desenvolvimento.');
   };
@@ -34,7 +41,7 @@ const TelaInicial: React.FC = () => {
         {/* Card principal */}
         <TouchableOpacity
           style={estilos.cardPrincipal}
-          onPress={avisoEmBreve}
+          onPress={() => navigation.navigate('NovaTraducao')}
           activeOpacity={0.7}
         >
           {/* Ícone à esquerda */}
