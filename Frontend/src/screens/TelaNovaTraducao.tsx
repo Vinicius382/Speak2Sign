@@ -4,9 +4,9 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  SafeAreaView,
   StatusBar,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -20,7 +20,7 @@ const TelaNovaTraducao: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
 
   return (
-    <SafeAreaView style={estilos.container}>
+    <SafeAreaView style={estilos.container} edges={['top']}>
       <StatusBar barStyle="dark-content" backgroundColor={cores.fundo} />
 
       {/* Cabeçalho */}
@@ -51,7 +51,6 @@ const TelaNovaTraducao: React.FC = () => {
           style={estilos.cardMetodo}
           activeOpacity={0.7}
           onPress={() => {
-            // Futura funcionalidade de gravação de áudio
           }}
         >
           <View style={estilos.iconeContainer}>

@@ -1,19 +1,20 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
-  SafeAreaView,
   StatusBar,
 } from 'react-native';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
 import type { RootStackParamList } from '../navigation/NavegacaoPrincipal';
 import { cores } from '../theme/cores';
 import BarraInferior from '../components/BarraInferior';
+import VLibrasWidget, { VLibrasWidgetRef } from '../components/VLibrasWidget';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type ResultadoRouteProp = RouteProp<RootStackParamList, 'ResultadoLibras'>;
@@ -22,9 +23,10 @@ const TelaResultadoLibras: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<ResultadoRouteProp>();
   const { texto } = route.params;
+  const vlibrasRef = useRef<VLibrasWidgetRef>(null);
 
   return (
-    <SafeAreaView style={estilos.container}>
+    <SafeAreaView style={estilos.container} edges={['top']}>
       <StatusBar barStyle="dark-content" backgroundColor={cores.fundo} />
 
       {/* Cabeçalho */}
@@ -35,7 +37,10 @@ const TelaResultadoLibras: React.FC = () => {
         >
           <Ionicons name="arrow-back" size={24} color={cores.textoPrincipal} />
         </TouchableOpacity>
-        <Text style={estilos.titulo}>Resultado em Libras</Text>
+        <View>
+          <Text style={estilos.titulo}>Tradução LIBRAS</Text>
+          <Text style={estilos.subtitulo}>Resultado da Tradução</Text>
+        </View>
       </View>
 
       {/* Indicadores de progresso */}
@@ -45,46 +50,29 @@ const TelaResultadoLibras: React.FC = () => {
         <View style={[estilos.indicador, estilos.indicadorAtivo]} />
       </View>
 
-      {/* Conteúdo principal */}
-      <View style={estilos.conteudo}>
-        {/* Área do avatar / VLibras */}
-        <View style={estilos.areaAvatar}>
-          <View style={estilos.avatarPlaceholder}>
-            <MaterialCommunityIcons
-              name="hand-wave-outline"
-              size={64}
-              color={cores.iconeTeal}
-            />
-            <Text style={estilos.avatarTexto}>Integração VLibras</Text>
-            <Text style={estilos.avatarSubtexto}>Em breve</Text>
-          </View>
-        </View>
+      {/* WebView com VLibras (Componentizado) */}
+      <View style={estilos.vlibrasWebViewCard}>
+        <VLibrasWidget ref={vlibrasRef} textoInicial={texto} />
+      </View>
 
-        {/* Texto original */}
-        <View style={estilos.textoOriginalContainer}>
-          <Text style={estilos.textoOriginalRotulo}>Texto original:</Text>
-          <Text style={estilos.textoOriginal}>{texto}</Text>
-        </View>
+      {/* Botões de ação */}
+      <View style={estilos.acoesContainer}>
+        <TouchableOpacity
+          style={estilos.botaoNovaTraducao}
+          onPress={() => navigation.navigate('NovaTraducao')}
+          activeOpacity={0.8}
+        >
+          <Text style={estilos.botaoNovaTraducaoTexto}>Nova Tradução</Text>
+        </TouchableOpacity>
 
-        {/* Botões de ação */}
-        <View style={estilos.acoesContainer}>
-          <TouchableOpacity
-            style={estilos.botaoNovaTraducao}
-            onPress={() => navigation.navigate('NovaTraducao')}
-            activeOpacity={0.8}
-          >
-            <Text style={estilos.botaoNovaTraducaoTexto}>Nova Tradução</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={estilos.botaoInicio}
-            onPress={() => navigation.navigate('Inicial')}
-            activeOpacity={0.8}
-          >
-            <Ionicons name="home-outline" size={20} color={cores.iconeTeal} />
-            <Text style={estilos.botaoInicioTexto}>Voltar ao Início</Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity
+          style={estilos.botaoInicio}
+          onPress={() => navigation.navigate('Inicial')}
+          activeOpacity={0.8}
+        >
+          <Ionicons name="home-outline" size={20} color={cores.iconeTeal} />
+          <Text style={estilos.botaoInicioTexto}>Voltar ao Início</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Barra de navegação inferior */}
@@ -102,15 +90,11 @@ const estilos = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: 16,
+    paddingTop: 8,
     paddingBottom: 8,
   },
   botaoVoltar: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
+    padding: 8,
     marginRight: 12,
   },
   titulo: {
@@ -118,11 +102,16 @@ const estilos = StyleSheet.create({
     fontWeight: '700',
     color: cores.textoPrincipal,
   },
+  subtitulo: {
+    fontSize: 14,
+    color: cores.textoSecundario,
+    marginTop: 2,
+  },
   indicadores: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 16,
+    paddingVertical: 12,
     gap: 8,
   },
   indicador: {
@@ -134,68 +123,25 @@ const estilos = StyleSheet.create({
   indicadorAtivo: {
     backgroundColor: cores.iconeTeal,
   },
-  conteudo: {
+  vlibrasWebViewCard: {
     flex: 1,
-    paddingHorizontal: 20,
-    paddingBottom: 100,
-  },
-  areaAvatar: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarPlaceholder: {
-    width: '100%',
-    height: 260,
-    backgroundColor: cores.superficie,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: cores.sombra,
+    marginHorizontal: 20,
+    marginBottom: 12,
+    borderRadius: 16,
+    overflow: 'hidden',
+    backgroundColor: '#FFF',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 10,
-    elevation: 3,
-  },
-  avatarTexto: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: cores.iconeTeal,
-    marginTop: 16,
-  },
-  avatarSubtexto: {
-    fontSize: 14,
-    color: cores.textoSecundario,
-    marginTop: 4,
-  },
-  textoOriginalContainer: {
-    backgroundColor: cores.superficie,
-    borderRadius: 14,
-    padding: 16,
-    marginTop: 20,
-    marginBottom: 20,
-    shadowColor: cores.sombra,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    elevation: 2,
-  },
-  textoOriginalRotulo: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: cores.textoSuave,
-    marginBottom: 6,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  textoOriginal: {
-    fontSize: 16,
-    color: cores.textoPrincipal,
-    lineHeight: 22,
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
   },
   acoesContainer: {
-    gap: 12,
-    marginBottom: 20,
+    paddingHorizontal: 20,
+    paddingBottom: 90,
+    gap: 10,
   },
   botaoNovaTraducao: {
     backgroundColor: cores.iconeTeal,
