@@ -5,6 +5,7 @@ import { useFonts, PlayfairDisplay_700Bold } from '@expo-google-fonts/playfair-d
 import { ActivityIndicator, View } from 'react-native';
 import NavegacaoPrincipal from './src/navigation/NavegacaoPrincipal';
 import { cores } from './src/theme/cores';
+import { VLibrasProvider } from './src/contexts/VLibrasProvider';
 
 export default function App() {
   const [fontesCarregadas] = useFonts({
@@ -20,9 +21,11 @@ export default function App() {
   }
 
   return (
-    <NavigationContainer>
-      <StatusBar style="dark" />
-      <NavegacaoPrincipal />
-    </NavigationContainer>
+    <VLibrasProvider>
+      <NavigationContainer>
+        <StatusBar style="dark" />
+        <NavegacaoPrincipal />
+      </NavigationContainer>
+    </VLibrasProvider>
   );
 }

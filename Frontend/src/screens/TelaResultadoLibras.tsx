@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -8,15 +8,16 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
+import { useRoute } from '@react-navigation/native';
 import type { RootStackParamList } from '../navigation/NavegacaoPrincipal';
 import { cores } from '../theme/cores';
 import BarraInferior from '../components/BarraInferior';
-import VLibrasWidget, { VLibrasWidgetRef } from '../components/VLibrasWidget';
 import BotaoVoltar from '../components/BotaoVoltar';
 import IndicadoresProgresso from '../components/IndicadoresProgresso';
+import { useVLibras } from '../contexts/VLibrasProvider';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type ResultadoRouteProp = RouteProp<RootStackParamList, 'ResultadoLibras'>;
@@ -25,7 +26,41 @@ const TelaResultadoLibras: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<ResultadoRouteProp>();
   const { texto } = route.params;
-  const vlibrasRef = useRef<VLibrasWidgetRef>(null);
+  const { pronto, traduzir, mostrar, esconder, definirLayout } = useVLibras();
+  const cardRef = useRef<View>(null);
+  const traduziuRef = useRef(false);
+
+  // useFocusEffect: dispara ao FOCAR e cleanup ao PERDER FOCO
+  // (diferente de useEffect, que só dispara cleanup ao desmontar)
+  useFocusEffect(
+    useCallback(() => {
+      mostrar();
+      traduziuRef.current = false;
+
+      return () => {
+        esconder();
+      };
+    }, [mostrar, esconder])
+  );
+
+  // Traduz quando o widget fica pronto
+  useEffect(() => {
+    if (pronto && !traduziuRef.current) {
+      traduziuRef.current = true;
+      setTimeout(() => {
+        traduzir(texto);
+      }, 500);
+    }
+  }, [pronto, texto, traduzir]);
+
+  // Mede a posição do card e informa ao Provider
+  const handleCardLayout = () => {
+    if (cardRef.current) {
+      cardRef.current.measureInWindow((x, y, width, height) => {
+        definirLayout({ x, y, width, height });
+      });
+    }
+  };
 
   return (
     <SafeAreaView style={estilos.container} edges={['top']}>
@@ -34,7 +69,7 @@ const TelaResultadoLibras: React.FC = () => {
       {/* Cabeçalho */}
       <View style={estilos.cabecalho}>
         <BotaoVoltar />
-        <View>
+        <View style={estilos.cabecalhoTexto}>
           <Text style={estilos.titulo}>Tradução LIBRAS</Text>
           <Text style={estilos.subtitulo}>Resultado da Tradução</Text>
         </View>
@@ -43,28 +78,28 @@ const TelaResultadoLibras: React.FC = () => {
       {/* Indicadores de progresso */}
       <IndicadoresProgresso atual={3} style={{ paddingVertical: 12 }} />
 
-      {/* WebView com VLibras (Componentizado) */}
-      <View style={estilos.vlibrasWebViewCard}>
-        <VLibrasWidget ref={vlibrasRef} textoInicial={texto} />
+      {/* Card onde o widget VLibras será posicionado (via Provider) */}
+      <View
+        ref={cardRef}
+        style={estilos.vlibrasWebViewCard}
+        onLayout={handleCardLayout}
+      >
+        {/* O conteúdo real (WebView) vem do VLibrasProvider, posicionado absolutamente sobre este card */}
       </View>
 
       {/* Botões de ação */}
       <View style={estilos.acoesContainer}>
         <TouchableOpacity
           style={estilos.botaoNovaTraducao}
-          onPress={() => navigation.navigate('NovaTraducao')}
+          onPress={() => 
+            navigation.reset({
+              index: 1,
+              routes: [{ name: 'Inicial' }, { name: 'NovaTraducao' }],
+            })
+          }
           activeOpacity={0.8}
         >
           <Text style={estilos.botaoNovaTraducaoTexto}>Nova Tradução</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={estilos.botaoInicio}
-          onPress={() => navigation.navigate('Inicial')}
-          activeOpacity={0.8}
-        >
-          <Ionicons name="home-outline" size={20} color={cores.iconeTeal} />
-          <Text style={estilos.botaoInicioTexto}>Voltar ao Início</Text>
         </TouchableOpacity>
       </View>
 
@@ -83,8 +118,11 @@ const estilos = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: 8,
+    paddingTop: 16,
     paddingBottom: 8,
+  },
+  cabecalhoTexto: {
+    marginLeft: 12,
   },
   titulo: {
     fontSize: 20,
@@ -98,8 +136,9 @@ const estilos = StyleSheet.create({
   },
   vlibrasWebViewCard: {
     flex: 1,
+    maxHeight: 520,
     marginHorizontal: 20,
-    marginBottom: 12,
+    marginBottom: 32,
     borderRadius: 16,
     overflow: 'hidden',
     backgroundColor: '#FFF',
@@ -112,9 +151,9 @@ const estilos = StyleSheet.create({
     borderColor: '#E0E0E0',
   },
   acoesContainer: {
+    marginTop: 'auto',
     paddingHorizontal: 20,
-    paddingBottom: 90,
-    gap: 10,
+    paddingBottom: 100,
   },
   botaoNovaTraducao: {
     backgroundColor: cores.iconeTeal,
@@ -127,22 +166,6 @@ const estilos = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     color: '#FFFFFF',
-  },
-  botaoInicio: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: cores.superficie,
-    borderRadius: 14,
-    paddingVertical: 14,
-    borderWidth: 1,
-    borderColor: cores.iconeTeal,
-    gap: 8,
-  },
-  botaoInicioTexto: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: cores.iconeTeal,
   },
 });
 

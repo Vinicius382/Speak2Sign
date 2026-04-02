@@ -1,18 +1,37 @@
-import React, { useRef, useState, useImperativeHandle, forwardRef } from 'react';
-import { StyleSheet, View, StyleProp, ViewStyle } from 'react-native';
+import React, {
+  createContext,
+  useContext,
+  useRef,
+  useState,
+  useCallback,
+} from 'react';
+import { StyleSheet, View, LayoutRectangle } from 'react-native';
 import { WebView } from 'react-native-webview';
 
-export interface VLibrasWidgetRef {
+// ─── Tipos ───────────────────────────────────────────────
+interface VLibrasContextType {
+  pronto: boolean;
+  visivel: boolean;
   traduzir: (texto: string) => void;
+  mostrar: () => void;
+  esconder: () => void;
+  definirLayout: (layout: LayoutRectangle) => void;
 }
 
-export interface VLibrasWidgetProps {
-  textoInicial: string;
-  onCarregado?: () => void;
-  style?: StyleProp<ViewStyle>;
-}
+// ─── Context ─────────────────────────────────────────────
+const VLibrasContext = createContext<VLibrasContextType>({
+  pronto: false,
+  visivel: false,
+  traduzir: () => { },
+  mostrar: () => { },
+  esconder: () => { },
+  definirLayout: () => { },
+});
 
-const getVLibrasHTML = (textToTranslate: string) => `
+export const useVLibras = () => useContext(VLibrasContext);
+
+// ─── HTML do VLibras (preload sem texto) ─────────────────
+const getVLibrasPreloadHTML = () => `
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -63,9 +82,6 @@ const getVLibrasHTML = (textToTranslate: string) => `
       margin-left: auto;
       white-space: nowrap;
     }
-    #translate-text:active::after {
-      opacity: 0.8;
-    }
     [vw-access-button] { opacity: 0 !important; pointer-events: none !important; }
     div[vw].enabled {
       top: 48px !important;
@@ -88,6 +104,21 @@ const getVLibrasHTML = (textToTranslate: string) => `
       min-height: 100% !important;
       border-radius: 0 !important;
       box-shadow: none !important;
+      display: flex !important;
+      justify-content: center !important;
+      align-items: center !important;
+    }
+    .vpw-settings-btn { display: none !important; }
+    .vpw-controls { left: 50% !important; transform: translateX(-50%) !important; }
+    .vw-plugin-top-wrapper {
+      width: 100% !important;
+      height: 100% !important;
+      display: flex !important;
+      justify-content: center !important;
+      align-items: center !important;
+    }
+    canvas {
+      margin: 0 auto !important;
     }
   </style>
 </head>
@@ -97,7 +128,7 @@ const getVLibrasHTML = (textToTranslate: string) => `
     <div vw-access-button class="active"></div>
     <div vw-plugin-wrapper><div class="vw-plugin-top-wrapper"></div></div>
   </div>
-  <div id="translate-text">${textToTranslate}</div>
+  <div id="translate-text"></div>
   <script>
     window.onerror = function() { return true; };
     window.alert = function() {};
@@ -106,7 +137,7 @@ const getVLibrasHTML = (textToTranslate: string) => `
   <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
   <script>
     new window.VLibras.Widget('https://vlibras.gov.br/app', {position: 'B'});
-    var textToTranslate = document.getElementById('translate-text').textContent;
+    var textToTranslate = '';
 
     function hideLoading() {
       var el = document.getElementById('loading');
@@ -164,7 +195,6 @@ const getVLibrasHTML = (textToTranslate: string) => `
         if (isWidgetReady()) {
           clearInterval(readyCheck);
           hideLoading();
-          setTimeout(doTranslate, 2000);
         } else if (attempts >= 40) {
           clearInterval(readyCheck);
           hideLoading();
@@ -175,6 +205,7 @@ const getVLibrasHTML = (textToTranslate: string) => `
     document.getElementById('translate-text').addEventListener('click', function() {
       doTranslate();
     });
+
     setTimeout(startTranslation, 2000);
     setTimeout(hideLoading, 25000);
   </script>
@@ -182,43 +213,86 @@ const getVLibrasHTML = (textToTranslate: string) => `
 </html>
 `;
 
-const VLibrasWidget = forwardRef<VLibrasWidgetRef, VLibrasWidgetProps>(
-  ({ textoInicial, onCarregado, style }, ref) => {
-    const webViewRef = useRef<WebView>(null);
-    const [webViewReady, setWebViewReady] = useState(false);
+// ─── Provider ────────────────────────────────────────────
+export const VLibrasProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const webViewRef = useRef<WebView>(null);
+  const [pronto, setPronto] = useState(false);
+  const [visivel, setVisivel] = useState(false);
+  const [layout, setLayout] = useState<LayoutRectangle | null>(null);
 
-    useImperativeHandle(ref, () => ({
-      traduzir: (texto: string) => {
-        if (webViewRef.current) {
-          const t = texto.replace(/"/g, '\\"').replace(/\n/g, '\\n');
-          const js = `
-            var textEl = document.getElementById('translate-text');
-            if(textEl) textEl.textContent = "${t}";
-            textToTranslate = "${t}";
-            doTranslate();
-            true;
-          `;
-          webViewRef.current.injectJavaScript(js);
-        }
+  const traduzir = useCallback((texto: string) => {
+    if (webViewRef.current) {
+      const t = texto.replace(/"/g, '\\"').replace(/\n/g, '\\n');
+      const js = `
+        var textEl = document.getElementById('translate-text');
+        if(textEl) textEl.textContent = "${t}";
+        textToTranslate = "${t}";
+        doTranslate();
+        true;
+      `;
+      webViewRef.current.injectJavaScript(js);
+    }
+  }, []);
+
+  const mostrar = useCallback(() => {
+    setVisivel(true);
+  }, []);
+
+  const esconder = useCallback(() => {
+    setVisivel(false);
+    setLayout(null);
+  }, []);
+
+  const definirLayout = useCallback((newLayout: LayoutRectangle) => {
+    setLayout(newLayout);
+  }, []);
+
+  const handleWebViewMessage = useCallback((event: any) => {
+    try {
+      const data = JSON.parse(event.nativeEvent.data);
+      if (data.type === 'ready') {
+        setPronto(true);
       }
-    }));
+    } catch (e) { }
+  }, []);
 
-    const handleWebViewMessage = (event: any) => {
-      try {
-        const data = JSON.parse(event.nativeEvent.data);
-        if (data.type === 'ready') {
-          setWebViewReady(true);
-          if (onCarregado) onCarregado();
-        }
-      } catch (e) {}
+  // Calcula o estilo de posição da WebView baseado no layout informado
+  const webviewPositionStyle = visivel && layout
+    ? {
+      position: 'absolute' as const,
+      top: layout.y,
+      left: layout.x,
+      width: layout.width,
+      height: layout.height,
+      opacity: 1,
+      zIndex: 9999,
+      borderRadius: 16,
+      overflow: 'hidden' as const,
+    }
+    : {
+      // Escondido mas ativo — fora da tela
+      position: 'absolute' as const,
+      width: 1,
+      height: 1,
+      top: -10,
+      left: -10,
+      opacity: 0,
+      zIndex: -1,
     };
 
-    return (
-      <View style={[estilos.container, style]}>
+  return (
+    <VLibrasContext.Provider
+      value={{ pronto, visivel, traduzir, mostrar, esconder, definirLayout }}
+    >
+      {children}
+      {/* WebView do VLibras — sempre montada, visibilidade controlada */}
+      <View style={webviewPositionStyle} pointerEvents={visivel ? 'auto' : 'none'}>
         <WebView
           ref={webViewRef}
           style={estilos.webview}
-          source={{ html: getVLibrasHTML(textoInicial) }}
+          source={{ html: getVLibrasPreloadHTML() }}
           javaScriptEnabled={true}
           domStorageEnabled={true}
           allowsInlineMediaPlayback={true}
@@ -231,20 +305,16 @@ const VLibrasWidget = forwardRef<VLibrasWidgetRef, VLibrasWidgetProps>(
           mixedContentMode="always"
         />
       </View>
-    );
-  }
-);
+    </VLibrasContext.Provider>
+  );
+};
 
+// ─── Estilos ─────────────────────────────────────────────
 const estilos = StyleSheet.create({
-  container: {
-    flex: 1,
-    overflow: 'hidden',
-    backgroundColor: '#FFF',
-  },
   webview: {
     flex: 1,
     backgroundColor: 'transparent',
   },
 });
 
-export default VLibrasWidget;
+export default VLibrasProvider;

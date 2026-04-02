@@ -46,7 +46,7 @@ const TelaNovaTraducao: React.FC = () => {
           onPress={() => navigation.navigate('FalarMensagem')}
         >
           <View style={estilos.iconeContainer}>
-            <Ionicons name="mic-outline" size={48} color={cores.textoSecundario} />
+            <Ionicons name="mic-outline" size={64} color={cores.textoSecundario} />
           </View>
           <Text style={estilos.cardMetodoTexto}>Falar</Text>
         </TouchableOpacity>
@@ -58,7 +58,7 @@ const TelaNovaTraducao: React.FC = () => {
           onPress={() => navigation.navigate('DigitarMensagem')}
         >
           <View style={[estilos.iconeContainer, estilos.iconeDigitar]}>
-            <Ionicons name="chatbubble" size={40} color="#FFFFFF" />
+            <Ionicons name="chatbubble" size={56} color="#FFFFFF" />
           </View>
           <Text style={estilos.cardMetodoTexto}>Digitar</Text>
         </TouchableOpacity>
@@ -107,9 +107,9 @@ const estilos = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     width: '100%',
-    paddingVertical: 28,
+    paddingVertical: 40,
     backgroundColor: cores.superficie,
-    borderRadius: 20,
+    borderRadius: 24,
     shadowColor: cores.sombra,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
@@ -117,9 +117,9 @@ const estilos = StyleSheet.create({
     elevation: 3,
   },
   iconeContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 12,
@@ -128,7 +128,7 @@ const estilos = StyleSheet.create({
     backgroundColor: '#2C2C2C',
   },
   cardMetodoTexto: {
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: '600',
     color: cores.textoPrincipal,
   },
