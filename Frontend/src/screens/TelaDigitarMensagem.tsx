@@ -17,6 +17,8 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/NavegacaoPrincipal';
 import { cores } from '../theme/cores';
 import BarraInferior from '../components/BarraInferior';
+import BotaoVoltar from '../components/BotaoVoltar';
+import IndicadoresProgresso from '../components/IndicadoresProgresso';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -51,21 +53,12 @@ const TelaDigitarMensagem: React.FC = () => {
       >
         {/* Cabeçalho */}
         <View style={estilos.cabecalho}>
-          <TouchableOpacity
-            style={estilos.botaoVoltar}
-            onPress={() => navigation.goBack()}
-          >
-            <Ionicons name="arrow-back" size={24} color={cores.textoPrincipal} />
-          </TouchableOpacity>
+          <BotaoVoltar />
           <Text style={estilos.titulo}>Digite a mensagem</Text>
         </View>
 
         {/* Indicadores de progresso */}
-        <View style={estilos.indicadores}>
-          <View style={[estilos.indicador, estilos.indicadorAtivo]} />
-          <View style={[estilos.indicador, estilos.indicadorAtivo]} />
-          <View style={estilos.indicador} />
-        </View>
+        <IndicadoresProgresso atual={2} />
 
         <ScrollView
           contentContainerStyle={estilos.conteudoScroll}
@@ -138,34 +131,10 @@ const estilos = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 8,
   },
-  botaoVoltar: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 12,
-  },
   titulo: {
     fontSize: 20,
     fontWeight: '700',
     color: cores.textoPrincipal,
-  },
-  indicadores: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 16,
-    gap: 8,
-  },
-  indicador: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#D9D9D9',
-  },
-  indicadorAtivo: {
-    backgroundColor: cores.iconeTeal,
   },
   conteudoScroll: {
     flexGrow: 1,

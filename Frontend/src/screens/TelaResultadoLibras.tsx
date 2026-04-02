@@ -15,6 +15,8 @@ import type { RootStackParamList } from '../navigation/NavegacaoPrincipal';
 import { cores } from '../theme/cores';
 import BarraInferior from '../components/BarraInferior';
 import VLibrasWidget, { VLibrasWidgetRef } from '../components/VLibrasWidget';
+import BotaoVoltar from '../components/BotaoVoltar';
+import IndicadoresProgresso from '../components/IndicadoresProgresso';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type ResultadoRouteProp = RouteProp<RootStackParamList, 'ResultadoLibras'>;
@@ -31,12 +33,7 @@ const TelaResultadoLibras: React.FC = () => {
 
       {/* Cabeçalho */}
       <View style={estilos.cabecalho}>
-        <TouchableOpacity
-          style={estilos.botaoVoltar}
-          onPress={() => navigation.goBack()}
-        >
-          <Ionicons name="arrow-back" size={24} color={cores.textoPrincipal} />
-        </TouchableOpacity>
+        <BotaoVoltar />
         <View>
           <Text style={estilos.titulo}>Tradução LIBRAS</Text>
           <Text style={estilos.subtitulo}>Resultado da Tradução</Text>
@@ -44,11 +41,7 @@ const TelaResultadoLibras: React.FC = () => {
       </View>
 
       {/* Indicadores de progresso */}
-      <View style={estilos.indicadores}>
-        <View style={[estilos.indicador, estilos.indicadorAtivo]} />
-        <View style={[estilos.indicador, estilos.indicadorAtivo]} />
-        <View style={[estilos.indicador, estilos.indicadorAtivo]} />
-      </View>
+      <IndicadoresProgresso atual={3} style={{ paddingVertical: 12 }} />
 
       {/* WebView com VLibras (Componentizado) */}
       <View style={estilos.vlibrasWebViewCard}>
@@ -93,10 +86,6 @@ const estilos = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: 8,
   },
-  botaoVoltar: {
-    padding: 8,
-    marginRight: 12,
-  },
   titulo: {
     fontSize: 20,
     fontWeight: '700',
@@ -106,22 +95,6 @@ const estilos = StyleSheet.create({
     fontSize: 14,
     color: cores.textoSecundario,
     marginTop: 2,
-  },
-  indicadores: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 12,
-    gap: 8,
-  },
-  indicador: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#D9D9D9',
-  },
-  indicadorAtivo: {
-    backgroundColor: cores.iconeTeal,
   },
   vlibrasWebViewCard: {
     flex: 1,

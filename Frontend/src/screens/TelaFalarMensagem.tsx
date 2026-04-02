@@ -20,6 +20,8 @@ import {
   ExpoSpeechRecognitionModule,
   useSpeechRecognitionEvent,
 } from 'expo-speech-recognition';
+import BotaoVoltar from '../components/BotaoVoltar';
+import IndicadoresProgresso from '../components/IndicadoresProgresso';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -137,6 +139,7 @@ const TelaFalarMensagem: React.FC = () => {
         lang: 'pt-BR',
         interimResults: true,
         continuous: false,
+        addsPunctuation: true, 
       });
     } catch (e) {
       console.error('Erro ao iniciar reconhecimento:', e);
@@ -171,21 +174,12 @@ const TelaFalarMensagem: React.FC = () => {
 
       {/* Cabeçalho */}
       <View style={estilos.cabecalho}>
-        <TouchableOpacity
-          style={estilos.botaoVoltar}
-          onPress={() => navigation.goBack()}
-        >
-          <Ionicons name="arrow-back" size={24} color={cores.textoPrincipal} />
-        </TouchableOpacity>
+        <BotaoVoltar />
         <Text style={estilos.titulo}>Falar Mensagem</Text>
       </View>
 
       {/* Indicadores de progresso */}
-      <View style={estilos.indicadores}>
-        <View style={[estilos.indicador, estilos.indicadorAtivo]} />
-        <View style={[estilos.indicador, estilos.indicadorAtivo]} />
-        <View style={estilos.indicador} />
-      </View>
+      <IndicadoresProgresso atual={2} />
 
       <ScrollView
         contentContainerStyle={estilos.conteudoScroll}
@@ -193,50 +187,52 @@ const TelaFalarMensagem: React.FC = () => {
       >
         {/* Área do microfone */}
         <View style={estilos.microfoneArea}>
-          {/* Anéis de pulso */}
-          {reconhecendo && (
-            <>
-              <Animated.View
-                style={[
-                  estilos.pulseRing,
-                  estilos.pulseRingExterna,
-                  {
-                    transform: [{ scale: pulseAnim }],
-                    opacity: opacityAnim,
-                  },
-                ]}
-              />
-              <Animated.View
-                style={[
-                  estilos.pulseRing,
-                  estilos.pulseRingInterna,
-                  {
-                    transform: [
-                      {
-                        scale: Animated.multiply(pulseAnim, 0.85),
-                      },
-                    ],
-                    opacity: Animated.multiply(opacityAnim, 1.3),
-                  },
-                ]}
-              />
-            </>
-          )}
+          <View style={estilos.microfoneContainer}>
+            {/* Anéis de pulso */}
+            {reconhecendo && (
+              <>
+                <Animated.View
+                  style={[
+                    estilos.pulseRing,
+                    estilos.pulseRingExterna,
+                    {
+                      transform: [{ scale: pulseAnim }],
+                      opacity: opacityAnim,
+                    },
+                  ]}
+                />
+                <Animated.View
+                  style={[
+                    estilos.pulseRing,
+                    estilos.pulseRingInterna,
+                    {
+                      transform: [
+                        {
+                          scale: Animated.multiply(pulseAnim, 0.85),
+                        },
+                      ],
+                      opacity: Animated.multiply(opacityAnim, 1.3),
+                    },
+                  ]}
+                />
+              </>
+            )}
 
-          <TouchableOpacity
-            style={[
-              estilos.botaoMicrofone,
-              reconhecendo && estilos.botaoMicrofoneAtivo,
-            ]}
-            onPress={reconhecendo ? pararReconhecimento : iniciarReconhecimento}
-            activeOpacity={0.8}
-          >
-            <Ionicons
-              name={reconhecendo ? 'stop' : 'mic'}
-              size={40}
-              color="#FFFFFF"
-            />
-          </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                estilos.botaoMicrofone,
+                reconhecendo && estilos.botaoMicrofoneAtivo,
+              ]}
+              onPress={reconhecendo ? pararReconhecimento : iniciarReconhecimento}
+              activeOpacity={0.8}
+            >
+              <Ionicons
+                name={reconhecendo ? 'stop' : 'mic'}
+                size={40}
+                color="#FFFFFF"
+              />
+            </TouchableOpacity>
+          </View>
 
           <Text style={estilos.microfoneLabel}>
             {reconhecendo
@@ -320,34 +316,10 @@ const estilos = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 8,
   },
-  botaoVoltar: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 12,
-  },
   titulo: {
     fontSize: 20,
     fontWeight: '700',
     color: cores.textoPrincipal,
-  },
-  indicadores: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 16,
-    gap: 8,
-  },
-  indicador: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#D9D9D9',
-  },
-  indicadorAtivo: {
-    backgroundColor: cores.iconeTeal,
   },
   conteudoScroll: {
     flexGrow: 1,
@@ -358,6 +330,12 @@ const estilos = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 32,
+  },
+  microfoneContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 140,
+    height: 140,
     position: 'relative',
   },
   pulseRing: {
@@ -367,12 +345,12 @@ const estilos = StyleSheet.create({
   pulseRingExterna: {
     width: 140,
     height: 140,
-    backgroundColor: cores.iconeTeal,
+    backgroundColor: '#f6a9b7ff', // Verde
   },
   pulseRingInterna: {
     width: 120,
     height: 120,
-    backgroundColor: cores.iconeTeal,
+    backgroundColor: '#f0bebeff', // Verde
   },
   botaoMicrofone: {
     width: 96,

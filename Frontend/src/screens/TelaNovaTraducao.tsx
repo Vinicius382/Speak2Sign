@@ -13,6 +13,8 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/NavegacaoPrincipal';
 import { cores } from '../theme/cores';
 import BarraInferior from '../components/BarraInferior';
+import BotaoVoltar from '../components/BotaoVoltar';
+import IndicadoresProgresso from '../components/IndicadoresProgresso';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -25,12 +27,7 @@ const TelaNovaTraducao: React.FC = () => {
 
       {/* Cabeçalho */}
       <View style={estilos.cabecalho}>
-        <TouchableOpacity
-          style={estilos.botaoVoltar}
-          onPress={() => navigation.goBack()}
-        >
-          <Ionicons name="arrow-back" size={24} color={cores.textoPrincipal} />
-        </TouchableOpacity>
+        <BotaoVoltar />
         <View style={estilos.cabecalhoTexto}>
           <Text style={estilos.titulo}>Nova Tradução</Text>
           <Text style={estilos.subtitulo}>Escolha o Método de Entrada</Text>
@@ -38,11 +35,7 @@ const TelaNovaTraducao: React.FC = () => {
       </View>
 
       {/* Indicadores de progresso */}
-      <View style={estilos.indicadores}>
-        <View style={[estilos.indicador, estilos.indicadorAtivo]} />
-        <View style={estilos.indicador} />
-        <View style={estilos.indicador} />
-      </View>
+      <IndicadoresProgresso atual={1} style={{ paddingVertical: 20 }} />
 
       {/* Conteúdo principal */}
       <View style={estilos.conteudo}>
@@ -89,19 +82,6 @@ const estilos = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 8,
   },
-  botaoVoltar: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: cores.superficie,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: cores.sombra,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
-  },
   cabecalhoTexto: {
     marginLeft: 12,
   },
@@ -114,22 +94,6 @@ const estilos = StyleSheet.create({
     fontSize: 13,
     color: cores.textoSecundario,
     marginTop: 2,
-  },
-  indicadores: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 20,
-    gap: 8,
-  },
-  indicador: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#D9D9D9',
-  },
-  indicadorAtivo: {
-    backgroundColor: cores.iconeTeal,
   },
   conteudo: {
     flex: 1,
