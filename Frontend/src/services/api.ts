@@ -19,10 +19,24 @@ interface CadastroPayload {
   senha: string;
 }
 
+interface EsqueciSenhaPayload {
+  email: string;
+}
+
+interface RedefinirSenhaPayload {
+  email: string;
+  token: string;
+  novaSenha: string;
+}
+
 interface UsuarioResposta {
   id: number;
   nome: string;
   email: string;
+}
+
+interface MensagemResposta {
+  mensagem: string;
 }
 
 export const loginUsuario = async (payload: LoginPayload): Promise<UsuarioResposta> => {
@@ -32,6 +46,16 @@ export const loginUsuario = async (payload: LoginPayload): Promise<UsuarioRespos
 
 export const cadastrarUsuario = async (payload: CadastroPayload): Promise<UsuarioResposta> => {
   const resposta = await api.post<UsuarioResposta>('/api/usuarios/cadastrar', payload);
+  return resposta.data;
+};
+
+export const solicitarRedefinicaoSenha = async (payload: EsqueciSenhaPayload): Promise<MensagemResposta> => {
+  const resposta = await api.post<MensagemResposta>('/api/usuarios/esqueci-senha', payload, { timeout: 30000 });
+  return resposta.data;
+};
+
+export const redefinirSenha = async (payload: RedefinirSenhaPayload): Promise<MensagemResposta> => {
+  const resposta = await api.post<MensagemResposta>('/api/usuarios/redefinir-senha', payload);
   return resposta.data;
 };
 

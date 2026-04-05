@@ -139,7 +139,7 @@ const TelaFalarMensagem: React.FC = () => {
         lang: 'pt-BR',
         interimResults: true,
         continuous: false,
-        addsPunctuation: true, 
+        addsPunctuation: true,
       });
     } catch (e) {
       console.error('Erro ao iniciar reconhecimento:', e);
@@ -185,6 +185,39 @@ const TelaFalarMensagem: React.FC = () => {
         contentContainerStyle={estilos.conteudoScroll}
         showsVerticalScrollIndicator={false}
       >
+        {/* Área de transcrição */}
+        <View style={estilos.transcricaoContainer}>
+          <View style={estilos.transcricaoHeader}>
+            <Text style={estilos.transcricaoLabel}>Texto Reconhecido</Text>
+            {textoExibido !== '' && (
+              <TouchableOpacity onPress={limparTranscricao}>
+                <Ionicons
+                  name="trash-outline"
+                  size={20}
+                  color={cores.textoSecundario}
+                />
+              </TouchableOpacity>
+            )}
+          </View>
+          <View style={estilos.transcricaoBox}>
+            {textoExibido ? (
+              <Text style={estilos.transcricaoTexto}>
+                {transcricao}
+                {transcricaoParcial ? (
+                  <Text style={estilos.transcricaoParcial}>
+                    {transcricao ? ' ' : ''}
+                    {transcricaoParcial}
+                  </Text>
+                ) : null}
+              </Text>
+            ) : (
+              <Text style={estilos.transcricaoPlaceholder}>
+                O texto reconhecido aparecerá aqui...
+              </Text>
+            )}
+          </View>
+        </View>
+
         {/* Área do microfone */}
         <View style={estilos.microfoneArea}>
           <View style={estilos.microfoneContainer}>
@@ -249,39 +282,6 @@ const TelaFalarMensagem: React.FC = () => {
           </View>
         )}
 
-        {/* Área de transcrição */}
-        <View style={estilos.transcricaoContainer}>
-          <View style={estilos.transcricaoHeader}>
-            <Text style={estilos.transcricaoLabel}>Texto Reconhecido</Text>
-            {textoExibido !== '' && (
-              <TouchableOpacity onPress={limparTranscricao}>
-                <Ionicons
-                  name="trash-outline"
-                  size={20}
-                  color={cores.textoSecundario}
-                />
-              </TouchableOpacity>
-            )}
-          </View>
-          <View style={estilos.transcricaoBox}>
-            {textoExibido ? (
-              <Text style={estilos.transcricaoTexto}>
-                {transcricao}
-                {transcricaoParcial ? (
-                  <Text style={estilos.transcricaoParcial}>
-                    {transcricao ? ' ' : ''}
-                    {transcricaoParcial}
-                  </Text>
-                ) : null}
-              </Text>
-            ) : (
-              <Text style={estilos.transcricaoPlaceholder}>
-                O texto reconhecido aparecerá aqui...
-              </Text>
-            )}
-          </View>
-        </View>
-
         {/* Botão Converter para Libras */}
         <View style={estilos.botaoContainer}>
           <TouchableOpacity
@@ -299,7 +299,7 @@ const TelaFalarMensagem: React.FC = () => {
       </ScrollView>
 
       {/* Barra de navegação inferior */}
-      <BarraInferior aoClicarItem={() => {}} />
+      <BarraInferior aoClicarItem={() => { }} />
     </SafeAreaView>
   );
 };
@@ -345,12 +345,12 @@ const estilos = StyleSheet.create({
   pulseRingExterna: {
     width: 140,
     height: 140,
-    backgroundColor: '#f6a9b7ff', // Verde
+    backgroundColor: '#f6a9b7ff',
   },
   pulseRingInterna: {
     width: 120,
     height: 120,
-    backgroundColor: '#f0bebeff', // Verde
+    backgroundColor: '#f0bebeff',
   },
   botaoMicrofone: {
     width: 96,

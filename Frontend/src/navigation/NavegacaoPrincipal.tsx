@@ -7,10 +7,16 @@ import TelaNovaTraducao from '../screens/TelaNovaTraducao';
 import TelaDigitarMensagem from '../screens/TelaDigitarMensagem';
 import TelaResultadoLibras from '../screens/TelaResultadoLibras';
 import TelaFalarMensagem from '../screens/TelaFalarMensagem';
+import TelaEsqueciSenha from '../screens/TelaEsqueciSenha';
+import TelaCodigoVerificacao from '../screens/TelaCodigoVerificacao';
+import TelaNovaSenha from '../screens/TelaNovaSenha';
 
 export type RootStackParamList = {
   Login: undefined;
   Cadastro: undefined;
+  EsqueciSenha: undefined;
+  CodigoVerificacao: { email: string };
+  NovaSenha: { email: string; token: string };
   Inicial: undefined;
   NovaTraducao: undefined;
   DigitarMensagem: undefined;
@@ -31,6 +37,9 @@ const NavegacaoPrincipal: React.FC = () => {
     >
       <Stack.Screen name="Login" component={TelaLogin} />
       <Stack.Screen name="Cadastro" component={TelaCadastro} />
+      <Stack.Screen name="EsqueciSenha" component={TelaEsqueciSenha} />
+      <Stack.Screen name="CodigoVerificacao" component={TelaCodigoVerificacao} />
+      <Stack.Screen name="NovaSenha" component={TelaNovaSenha} />
       <Stack.Screen
         name="Inicial"
         component={TelaInicial}

@@ -12,28 +12,26 @@ import CabecalhoAutenticacao from '../components/CabecalhoAutenticacao';
 import EntradaPersonalizada from '../components/EntradaPersonalizada';
 import BotaoPrincipal from '../components/BotaoPrincipal';
 import TextoLink from '../components/TextoLink';
-import { loginUsuario } from '../services/api';
+import { solicitarRedefinicaoSenha } from '../services/api';
 import { cores } from '../theme/cores';
 
 type RootStackParamList = {
   Login: undefined;
-  Cadastro: undefined;
-  Inicial: undefined;
   EsqueciSenha: undefined;
+  CodigoVerificacao: { email: string };
 };
 
-interface TelaLoginProps {
-  navigation: NativeStackNavigationProp<RootStackParamList, 'Login'>;
+interface TelaEsqueciSenhaProps {
+  navigation: NativeStackNavigationProp<RootStackParamList, 'EsqueciSenha'>;
 }
 
-const TelaLogin: React.FC<TelaLoginProps> = ({ navigation }) => {
+const TelaEsqueciSenha: React.FC<TelaEsqueciSenhaProps> = ({ navigation }) => {
   const [email, setEmail] = useState('');
-  const [senha, setSenha] = useState('');
   const [carregando, setCarregando] = useState(false);
-  const [erros, setErros] = useState<{ email?: string; senha?: string }>({});
+  const [erros, setErros] = useState<{ email?: string }>({});
 
   const validar = (): boolean => {
-    const novosErros: { email?: string; senha?: string } = {};
+    const novosErros: { email?: string } = {};
 
     if (!email.trim()) {
       novosErros.email = 'O e-mail é obrigatório';
@@ -41,28 +39,21 @@ const TelaLogin: React.FC<TelaLoginProps> = ({ navigation }) => {
       novosErros.email = 'E-mail inválido';
     }
 
-    if (!senha.trim()) {
-      novosErros.senha = 'A senha é obrigatória';
-    }
-
     setErros(novosErros);
     return Object.keys(novosErros).length === 0;
   };
 
-  const aoEntrar = async () => {
+  const aoEnviar = async () => {
     if (!validar()) return;
 
     setCarregando(true);
     try {
-      await loginUsuario({ email: email.trim(), senha });
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Inicial' }],
-      });
+      await solicitarRedefinicaoSenha({ email: email.trim() });
+      navigation.navigate('CodigoVerificacao', { email: email.trim() });
     } catch (erro: any) {
       const mensagem =
         erro.response?.data || 'Erro ao conectar com o servidor. Tente novamente.';
-      Alert.alert('Erro', typeof mensagem === 'string' ? mensagem : 'Email ou senha incorretos.');
+      Alert.alert('Erro', typeof mensagem === 'string' ? mensagem : 'Erro ao enviar código.');
     } finally {
       setCarregando(false);
     }
@@ -80,49 +71,33 @@ const TelaLogin: React.FC<TelaLoginProps> = ({ navigation }) => {
       >
         <View style={estilos.espacoTopo} />
 
-        <CabecalhoAutenticacao subtitulo="Seja Bem Vindo de Volta" />
+        <CabecalhoAutenticacao subtitulo="Recupere Sua Senha" />
 
         <View style={estilos.containerFormulario}>
           <EntradaPersonalizada
             placeholder="Email"
-            textoPlaceholder="Digite seu email"
+            textoPlaceholder="Digite seu email cadastrado"
             valor={email}
             aoMudarTexto={setEmail}
             tipoTeclado="email-address"
             autoCapitalizar="none"
             erro={erros.email}
           />
-
-          <EntradaPersonalizada
-            placeholder="Senha"
-            textoPlaceholder="Digite sua senha"
-            valor={senha}
-            aoMudarTexto={setSenha}
-            textoSeguro
-            erro={erros.senha}
-          />
-
-          <TextoLink
-            texto="Esqueceu a Senha?"
-            textoLink="Recupere"
-            aoClicar={() => navigation.navigate('EsqueciSenha')}
-            estilo={estilos.esqueceuSenha}
-          />
         </View>
       </ScrollView>
 
       <View style={estilos.containerInferior}>
         <BotaoPrincipal
-          titulo="Entrar"
-          aoClicar={aoEntrar}
+          titulo="Enviar Código"
+          aoClicar={aoEnviar}
           carregando={carregando}
         />
 
         <TextoLink
-          texto="Não tem Conta?"
-          textoLink="Cadastre-se"
-          aoClicar={() => navigation.navigate('Cadastro')}
-          estilo={estilos.linkCadastro}
+          texto="Lembrou a senha?"
+          textoLink="Fazer Login"
+          aoClicar={() => navigation.navigate('Login')}
+          estilo={estilos.linkVoltar}
         />
       </View>
     </KeyboardAvoidingView>
@@ -144,20 +119,15 @@ const estilos = StyleSheet.create({
   containerFormulario: {
     flex: 1,
   },
-  esqueceuSenha: {
-    alignItems: 'flex-end' as const,
-    marginTop: -8,
-    marginBottom: 8,
-  },
   containerInferior: {
     paddingHorizontal: 28,
     paddingBottom: 38,
     paddingTop: 12,
     backgroundColor: cores.fundo,
   },
-  linkCadastro: {
+  linkVoltar: {
     marginTop: 14,
   },
 });
 
-export default TelaLogin;
+export default TelaEsqueciSenha;
