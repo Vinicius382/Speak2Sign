@@ -1,5 +1,7 @@
 package com.speak2sign.controller;
 
+import com.speak2sign.dto.AtualizarPerfilDTO;
+import com.speak2sign.dto.AlterarSenhaDTO;
 import com.speak2sign.dto.CadastroRequestDTO;
 import com.speak2sign.dto.EsqueciSenhaRequestDTO;
 import com.speak2sign.dto.LoginRequestDTO;
@@ -64,6 +66,26 @@ public class UsuarioController {
         try {
             usuarioService.redefinirSenha(dto.getEmail(), dto.getToken(), dto.getNovaSenha());
             return ResponseEntity.ok(Map.of("mensagem", "Senha redefinida com sucesso!"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/{id}/atualizar")
+    public ResponseEntity<?> atualizarPerfil(@PathVariable Long id, @RequestBody AtualizarPerfilDTO dto) {
+        try {
+            Usuario usuarioAtualizado = usuarioService.atualizarPerfil(id, dto.getNome());
+            return ResponseEntity.ok(UsuarioResponseDTO.fromEntity(usuarioAtualizado));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/{id}/alterar-senha")
+    public ResponseEntity<?> alterarSenha(@PathVariable Long id, @RequestBody AlterarSenhaDTO dto) {
+        try {
+            usuarioService.alterarSenha(id, dto.getSenhaAtual(), dto.getNovaSenha());
+            return ResponseEntity.ok(Map.of("mensagem", "Senha alterada com sucesso!"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

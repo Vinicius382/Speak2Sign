@@ -101,4 +101,32 @@ public class UsuarioService {
         usuario.setResetTokenExpiration(null);
         usuarioRepository.save(usuario);
     }
+
+    public Usuario atualizarPerfil(Long id, String nome) {
+        Optional<Usuario> optUsuario = usuarioRepository.findById(id);
+        if (optUsuario.isEmpty()) {
+            throw new RuntimeException("Usuário não encontrado.");
+        }
+
+        Usuario usuario = optUsuario.get();
+        usuario.setNome(nome);
+        return usuarioRepository.save(usuario);
+    }
+
+    public void alterarSenha(Long id, String senhaAtual, String novaSenha) {
+        Optional<Usuario> optUsuario = usuarioRepository.findById(id);
+        if (optUsuario.isEmpty()) {
+            throw new RuntimeException("Usuário não encontrado.");
+        }
+
+        Usuario usuario = optUsuario.get();
+
+        if (!BCrypt.checkpw(senhaAtual, usuario.getSenha())) {
+            throw new RuntimeException("Senha atual incorreta.");
+        }
+
+        String senhaHash = BCrypt.hashpw(novaSenha, BCrypt.gensalt());
+        usuario.setSenha(senhaHash);
+        usuarioRepository.save(usuario);
+    }
 }
