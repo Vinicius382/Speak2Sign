@@ -9,54 +9,57 @@ import { cores } from '../theme/cores';
 type ItemBarra = {
   icone: keyof typeof Ionicons.glyphMap;
   rotulo: string;
-  ativo?: boolean;
+  rota: keyof RootStackParamList;
 };
 
 interface BarraInferiorProps {
-  aoClicarItem?: (rotulo: string) => void;
+  telaAtiva?: string;
 }
 
 const itens: ItemBarra[] = [
-  { icone: 'home-outline', rotulo: 'Início', ativo: true },
-  { icone: 'time-outline', rotulo: 'Histórico' },
-  { icone: 'star-outline', rotulo: 'Favoritos' },
-  { icone: 'person-outline', rotulo: 'Perfil' },
+  { icone: 'home-outline', rotulo: 'Início', rota: 'Inicial' },
+  { icone: 'time-outline', rotulo: 'Histórico', rota: 'Historico' },
+  { icone: 'star-outline', rotulo: 'Favoritos', rota: 'Favoritos' },
+  { icone: 'person-outline', rotulo: 'Perfil', rota: 'Inicial' },
 ];
 
-const BarraInferior: React.FC<BarraInferiorProps> = ({ aoClicarItem }) => {
+const BarraInferior: React.FC<BarraInferiorProps> = ({ telaAtiva = 'Início' }) => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
-  const lidarComClique = (rotulo: string) => {
-    if (rotulo === 'Início') {
-      navigation.navigate('Inicial');
+  const lidarComClique = (item: ItemBarra) => {
+    if (item.rotulo === 'Perfil') {
+      // Placeholder — futuramente navegará para Perfil
       return;
     }
-    aoClicarItem?.(rotulo);
+    navigation.navigate(item.rota as any);
   };
 
   return (
     <View style={estilos.barraInferior}>
-      {itens.map((item) => (
-        <TouchableOpacity
-          key={item.rotulo}
-          style={estilos.itemBarra}
-          onPress={() => lidarComClique(item.rotulo)}
-        >
-          <Ionicons
-            name={item.icone}
-            size={24}
-            color={item.ativo ? cores.iconeTeal : cores.textoSuave}
-          />
-          <Text
-            style={[
-              estilos.textoBarra,
-              item.ativo && estilos.textoBarraAtivo,
-            ]}
+      {itens.map((item) => {
+        const ativo = item.rotulo === telaAtiva;
+        return (
+          <TouchableOpacity
+            key={item.rotulo}
+            style={estilos.itemBarra}
+            onPress={() => lidarComClique(item)}
           >
-            {item.rotulo}
-          </Text>
-        </TouchableOpacity>
-      ))}
+            <Ionicons
+              name={item.icone}
+              size={24}
+              color={ativo ? cores.iconeTeal : cores.textoSuave}
+            />
+            <Text
+              style={[
+                estilos.textoBarra,
+                ativo && estilos.textoBarraAtivo,
+              ]}
+            >
+              {item.rotulo}
+            </Text>
+          </TouchableOpacity>
+        );
+      })}
     </View>
   );
 };

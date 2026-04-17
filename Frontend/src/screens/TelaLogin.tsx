@@ -14,6 +14,7 @@ import BotaoPrincipal from '../components/BotaoPrincipal';
 import TextoLink from '../components/TextoLink';
 import { loginUsuario } from '../services/api';
 import { cores } from '../theme/cores';
+import { useAuth } from '../contexts/AuthProvider';
 
 type RootStackParamList = {
   Login: undefined;
@@ -31,6 +32,7 @@ const TelaLogin: React.FC<TelaLoginProps> = ({ navigation }) => {
   const [senha, setSenha] = useState('');
   const [carregando, setCarregando] = useState(false);
   const [erros, setErros] = useState<{ email?: string; senha?: string }>({});
+  const { salvarUsuario } = useAuth();
 
   const validar = (): boolean => {
     const novosErros: { email?: string; senha?: string } = {};
@@ -54,7 +56,8 @@ const TelaLogin: React.FC<TelaLoginProps> = ({ navigation }) => {
 
     setCarregando(true);
     try {
-      await loginUsuario({ email: email.trim(), senha });
+      const resposta = await loginUsuario({ email: email.trim(), senha });
+      await salvarUsuario({ id: resposta.id, nome: resposta.nome, email: resposta.email });
       navigation.reset({
         index: 0,
         routes: [{ name: 'Inicial' }],

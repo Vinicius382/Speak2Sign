@@ -23,6 +23,9 @@ const TelaInicial: React.FC = () => {
     Alert.alert('Em breve', 'Funcionalidade em desenvolvimento.');
   };
 
+  const navegarParaFavoritos = () => navigation.navigate('Favoritos');
+  const navegarParaHistorico = () => navigation.navigate('Historico');
+
   return (
     <View style={estilos.container}>
       <ScrollView
@@ -70,13 +73,13 @@ const TelaInicial: React.FC = () => {
 
         {/* Grade 2x2 */}
         <View style={estilos.grade}>
-          <TouchableOpacity style={estilos.cardGrade} onPress={avisoEmBreve} activeOpacity={0.7}>
+          <TouchableOpacity style={estilos.cardGrade} onPress={navegarParaFavoritos} activeOpacity={0.7}>
             <Ionicons name="star-outline" size={26} color={cores.textoSuave} />
             <Text style={estilos.cardGradeTitulo}>Favoritos</Text>
             <Text style={estilos.cardGradeDescricao}>Acesse suas mensagens favoritas</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={estilos.cardGrade} onPress={avisoEmBreve} activeOpacity={0.7}>
+          <TouchableOpacity style={estilos.cardGrade} onPress={navegarParaHistorico} activeOpacity={0.7}>
             <Ionicons name="time-outline" size={26} color={cores.textoSuave} />
             <Text style={estilos.cardGradeTitulo}>Histórico</Text>
             <Text style={estilos.cardGradeDescricao}>Reveja suas conversas e mensagens anteriores</Text>
@@ -97,7 +100,7 @@ const TelaInicial: React.FC = () => {
       </ScrollView>
 
       {/* Barra de navegação inferior */}
-      <BarraInferior aoClicarItem={avisoEmBreve} />
+      <BarraInferior telaAtiva="Início" />
     </View>
   );
 };

@@ -6,6 +6,8 @@ import { ActivityIndicator, View } from 'react-native';
 import NavegacaoPrincipal from './src/navigation/NavegacaoPrincipal';
 import { cores } from './src/theme/cores';
 import { VLibrasProvider } from './src/contexts/VLibrasProvider';
+import { HistoricoFavoritosProvider } from './src/contexts/HistoricoFavoritosProvider';
+import { AuthProvider } from './src/contexts/AuthProvider';
 
 export default function App() {
   const [fontesCarregadas] = useFonts({
@@ -21,11 +23,15 @@ export default function App() {
   }
 
   return (
-    <VLibrasProvider>
-      <NavigationContainer>
-        <StatusBar style="dark" />
-        <NavegacaoPrincipal />
-      </NavigationContainer>
-    </VLibrasProvider>
+    <AuthProvider>
+      <HistoricoFavoritosProvider>
+        <VLibrasProvider>
+          <NavigationContainer>
+            <StatusBar style="dark" />
+            <NavegacaoPrincipal />
+          </NavigationContainer>
+        </VLibrasProvider>
+      </HistoricoFavoritosProvider>
+    </AuthProvider>
   );
 }

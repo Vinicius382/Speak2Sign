@@ -18,6 +18,8 @@ import BarraInferior from '../components/BarraInferior';
 import BotaoVoltar from '../components/BotaoVoltar';
 import IndicadoresProgresso from '../components/IndicadoresProgresso';
 import { useVLibras } from '../contexts/VLibrasProvider';
+import { useHistoricoFavoritos } from '../contexts/HistoricoFavoritosProvider';
+import { cores as coresTema } from '../theme/cores';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type ResultadoRouteProp = RouteProp<RootStackParamList, 'ResultadoLibras'>;
@@ -27,6 +29,7 @@ const TelaResultadoLibras: React.FC = () => {
   const route = useRoute<ResultadoRouteProp>();
   const { texto } = route.params;
   const { pronto, traduzir, mostrar, esconder, definirLayout } = useVLibras();
+  const { alternarFavorito, ehFavorito } = useHistoricoFavoritos();
   const cardRef = useRef<View>(null);
   const traduziuRef = useRef(false);
 
@@ -73,6 +76,16 @@ const TelaResultadoLibras: React.FC = () => {
           <Text style={estilos.titulo}>Tradução LIBRAS</Text>
           <Text style={estilos.subtitulo}>Resultado da Tradução</Text>
         </View>
+        <TouchableOpacity
+          onPress={() => alternarFavorito(texto, 'texto')}
+          style={estilos.botaoFavorito}
+        >
+          <Ionicons
+            name={ehFavorito(texto) ? 'star' : 'star-outline'}
+            size={24}
+            color={ehFavorito(texto) ? coresTema.favorito : coresTema.textoSuave}
+          />
+        </TouchableOpacity>
       </View>
 
       {/* Indicadores de progresso */}
@@ -104,7 +117,7 @@ const TelaResultadoLibras: React.FC = () => {
       </View>
 
       {/* Barra de navegação inferior */}
-      <BarraInferior aoClicarItem={() => {}} />
+      <BarraInferior />
     </SafeAreaView>
   );
 };
@@ -123,6 +136,11 @@ const estilos = StyleSheet.create({
   },
   cabecalhoTexto: {
     marginLeft: 12,
+    flex: 1,
+  },
+  botaoFavorito: {
+    padding: 8,
+    marginLeft: 'auto',
   },
   titulo: {
     fontSize: 20,

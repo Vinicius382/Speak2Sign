@@ -22,6 +22,7 @@ import {
 } from 'expo-speech-recognition';
 import BotaoVoltar from '../components/BotaoVoltar';
 import IndicadoresProgresso from '../components/IndicadoresProgresso';
+import { useHistoricoFavoritos } from '../contexts/HistoricoFavoritosProvider';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -31,6 +32,7 @@ const TelaFalarMensagem: React.FC = () => {
   const [transcricao, setTranscricao] = useState('');
   const [transcricaoParcial, setTranscricaoParcial] = useState('');
   const [erro, setErro] = useState('');
+  const { adicionarAoHistorico } = useHistoricoFavoritos();
 
   // Animações
   const pulseAnim = useRef(new Animated.Value(1)).current;
@@ -160,9 +162,10 @@ const TelaFalarMensagem: React.FC = () => {
   const converterParaLibras = useCallback(() => {
     const textoFinal = transcricao.trim();
     if (textoFinal) {
+      adicionarAoHistorico(textoFinal, 'voz');
       navigation.navigate('ResultadoLibras', { texto: textoFinal });
     }
-  }, [transcricao, navigation]);
+  }, [transcricao, navigation, adicionarAoHistorico]);
 
   const textoExibido = transcricaoParcial
     ? `${transcricao} ${transcricaoParcial}`.trim()
@@ -299,7 +302,7 @@ const TelaFalarMensagem: React.FC = () => {
       </ScrollView>
 
       {/* Barra de navegação inferior */}
-      <BarraInferior aoClicarItem={() => { }} />
+      <BarraInferior />
     </SafeAreaView>
   );
 };

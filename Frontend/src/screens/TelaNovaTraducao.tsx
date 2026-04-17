@@ -65,7 +65,7 @@ const TelaNovaTraducao: React.FC = () => {
       </View>
 
       {/* Barra de navegação inferior */}
-      <BarraInferior aoClicarItem={() => {}} />
+      <BarraInferior />
     </SafeAreaView>
   );
 };

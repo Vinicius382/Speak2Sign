@@ -19,6 +19,7 @@ import { cores } from '../theme/cores';
 import BarraInferior from '../components/BarraInferior';
 import BotaoVoltar from '../components/BotaoVoltar';
 import IndicadoresProgresso from '../components/IndicadoresProgresso';
+import { useHistoricoFavoritos } from '../contexts/HistoricoFavoritosProvider';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -32,6 +33,7 @@ const mensagensSugeridas = [
 const TelaDigitarMensagem: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
   const [mensagem, setMensagem] = useState('');
+  const { adicionarAoHistorico } = useHistoricoFavoritos();
 
   const selecionarSugestao = (sugestao: string) => {
     setMensagem(sugestao);
@@ -39,6 +41,7 @@ const TelaDigitarMensagem: React.FC = () => {
 
   const converterParaLibras = () => {
     if (mensagem.trim()) {
+      adicionarAoHistorico(mensagem.trim(), 'texto');
       navigation.navigate('ResultadoLibras', { texto: mensagem.trim() });
     }
   };
@@ -111,7 +114,7 @@ const TelaDigitarMensagem: React.FC = () => {
       </KeyboardAvoidingView>
 
       {/* Barra de navegação inferior */}
-      <BarraInferior aoClicarItem={() => {}} />
+      <BarraInferior />
     </SafeAreaView>
   );
 };

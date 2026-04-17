@@ -10,6 +10,8 @@ import TelaFalarMensagem from '../screens/TelaFalarMensagem';
 import TelaEsqueciSenha from '../screens/TelaEsqueciSenha';
 import TelaCodigoVerificacao from '../screens/TelaCodigoVerificacao';
 import TelaNovaSenha from '../screens/TelaNovaSenha';
+import TelaHistorico from '../screens/TelaHistorico';
+import TelaFavoritos from '../screens/TelaFavoritos';
 
 export type RootStackParamList = {
   Login: undefined;
@@ -22,6 +24,8 @@ export type RootStackParamList = {
   DigitarMensagem: undefined;
   FalarMensagem: undefined;
   ResultadoLibras: { texto: string };
+  Historico: undefined;
+  Favoritos: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -49,6 +53,8 @@ const NavegacaoPrincipal: React.FC = () => {
       <Stack.Screen name="DigitarMensagem" component={TelaDigitarMensagem} />
       <Stack.Screen name="FalarMensagem" component={TelaFalarMensagem} />
       <Stack.Screen name="ResultadoLibras" component={TelaResultadoLibras} />
+      <Stack.Screen name="Historico" component={TelaHistorico} />
+      <Stack.Screen name="Favoritos" component={TelaFavoritos} />
     </Stack.Navigator>
   );
 };

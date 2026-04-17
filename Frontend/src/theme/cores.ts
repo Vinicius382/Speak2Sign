@@ -28,6 +28,14 @@ export const cores = {
   erro: '#E74C3C',
   sucesso: '#2ECC71',
   
+  // Tipos de tradução
+  tipoVoz: '#2DD4BF',
+  tipoTexto: '#94A3B8',
+  tipoLibras: '#6366F1',
+
+  // Favorito
+  favorito: '#FBBF24',
+
   // Sombra
   sombra: '#000000',
 };
