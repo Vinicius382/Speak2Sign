@@ -11,6 +11,7 @@ interface AuthContexto {
   usuario: UsuarioLogado | null;
   salvarUsuario: (usuario: UsuarioLogado) => Promise<void>;
   limparUsuario: () => Promise<void>;
+  atualizarNome: (novoNome: string) => Promise<void>;
 }
 
 const CHAVE_USUARIO = '@speak2sign_usuario';
@@ -61,9 +62,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const atualizarNome = async (novoNome: string) => {
+    if (!usuario) return;
+    try {
+      const atualizado = { ...usuario, nome: novoNome };
+      await AsyncStorage.setItem(CHAVE_USUARIO, JSON.stringify(atualizado));
+      setUsuario(atualizado);
+    } catch (e) {
+      console.error('Erro ao atualizar nome:', e);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ usuario, salvarUsuario, limparUsuario }}>
+    <AuthContext.Provider value={{ usuario, salvarUsuario, limparUsuario, atualizarNome }}>
       {children}
     </AuthContext.Provider>
   );
 };
+

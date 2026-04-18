@@ -8,6 +8,7 @@ import { cores } from './src/theme/cores';
 import { VLibrasProvider } from './src/contexts/VLibrasProvider';
 import { HistoricoFavoritosProvider } from './src/contexts/HistoricoFavoritosProvider';
 import { AuthProvider } from './src/contexts/AuthProvider';
+import { ConfiguracoesProvider } from './src/contexts/ConfiguracoesProvider';
 
 export default function App() {
   const [fontesCarregadas] = useFonts({
@@ -24,14 +25,17 @@ export default function App() {
 
   return (
     <AuthProvider>
-      <HistoricoFavoritosProvider>
-        <VLibrasProvider>
-          <NavigationContainer>
-            <StatusBar style="dark" />
-            <NavegacaoPrincipal />
-          </NavigationContainer>
-        </VLibrasProvider>
-      </HistoricoFavoritosProvider>
+      <ConfiguracoesProvider>
+        <HistoricoFavoritosProvider>
+          <VLibrasProvider>
+            <NavigationContainer>
+              <StatusBar style="dark" />
+              <NavegacaoPrincipal />
+            </NavigationContainer>
+          </VLibrasProvider>
+        </HistoricoFavoritosProvider>
+      </ConfiguracoesProvider>
     </AuthProvider>
   );
 }
+

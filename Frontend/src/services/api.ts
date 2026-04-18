@@ -31,6 +31,15 @@ interface RedefinirSenhaPayload {
   novaSenha: string;
 }
 
+interface AtualizarPerfilPayload {
+  nome: string;
+}
+
+interface AlterarSenhaPayload {
+  senhaAtual: string;
+  novaSenha: string;
+}
+
 interface UsuarioResposta {
   id: number;
   nome: string;
@@ -123,6 +132,18 @@ export const adicionarFavoritoApi = async (usuarioId: number, payload: FavoritoP
 
 export const removerFavoritoApi = async (usuarioId: number, itemId: number): Promise<MensagemResposta> => {
   const resposta = await api.delete<MensagemResposta>(`/api/usuarios/${usuarioId}/favoritos/${itemId}`);
+  return resposta.data;
+};
+
+// === Perfil ===
+
+export const atualizarPerfil = async (usuarioId: number, payload: AtualizarPerfilPayload): Promise<UsuarioResposta> => {
+  const resposta = await api.put<UsuarioResposta>(`/api/usuarios/${usuarioId}/atualizar`, payload);
+  return resposta.data;
+};
+
+export const alterarSenhaApi = async (usuarioId: number, payload: AlterarSenhaPayload): Promise<MensagemResposta> => {
+  const resposta = await api.put<MensagemResposta>(`/api/usuarios/${usuarioId}/alterar-senha`, payload);
   return resposta.data;
 };
 

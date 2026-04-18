@@ -12,6 +12,9 @@ import TelaCodigoVerificacao from '../screens/TelaCodigoVerificacao';
 import TelaNovaSenha from '../screens/TelaNovaSenha';
 import TelaHistorico from '../screens/TelaHistorico';
 import TelaFavoritos from '../screens/TelaFavoritos';
+import TelaMinhaConta from '../screens/TelaMinhaConta';
+import TelaEditarPerfil from '../screens/TelaEditarPerfil';
+import TelaAlterarSenha from '../screens/TelaAlterarSenha';
 
 export type RootStackParamList = {
   Login: undefined;
@@ -26,6 +29,9 @@ export type RootStackParamList = {
   ResultadoLibras: { texto: string };
   Historico: undefined;
   Favoritos: undefined;
+  MinhaConta: undefined;
+  EditarPerfil: undefined;
+  AlterarSenha: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -55,8 +61,12 @@ const NavegacaoPrincipal: React.FC = () => {
       <Stack.Screen name="ResultadoLibras" component={TelaResultadoLibras} />
       <Stack.Screen name="Historico" component={TelaHistorico} />
       <Stack.Screen name="Favoritos" component={TelaFavoritos} />
+      <Stack.Screen name="MinhaConta" component={TelaMinhaConta} />
+      <Stack.Screen name="EditarPerfil" component={TelaEditarPerfil} />
+      <Stack.Screen name="AlterarSenha" component={TelaAlterarSenha} />
     </Stack.Navigator>
   );
 };
 
 export default NavegacaoPrincipal;
+

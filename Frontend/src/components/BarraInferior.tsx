@@ -20,17 +20,13 @@ const itens: ItemBarra[] = [
   { icone: 'home-outline', rotulo: 'Início', rota: 'Inicial' },
   { icone: 'time-outline', rotulo: 'Histórico', rota: 'Historico' },
   { icone: 'star-outline', rotulo: 'Favoritos', rota: 'Favoritos' },
-  { icone: 'person-outline', rotulo: 'Perfil', rota: 'Inicial' },
+  { icone: 'person-outline', rotulo: 'Perfil', rota: 'MinhaConta' },
 ];
 
 const BarraInferior: React.FC<BarraInferiorProps> = ({ telaAtiva = 'Início' }) => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const lidarComClique = (item: ItemBarra) => {
-    if (item.rotulo === 'Perfil') {
-      // Placeholder — futuramente navegará para Perfil
-      return;
-    }
     navigation.navigate(item.rota as any);
   };
 

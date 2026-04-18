@@ -91,7 +91,7 @@ const TelaInicial: React.FC = () => {
             <Text style={estilos.cardGradeDescricao}>Aprenda o básico de Libras</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={estilos.cardGrade} onPress={avisoEmBreve} activeOpacity={0.7}>
+          <TouchableOpacity style={estilos.cardGrade} onPress={() => navigation.navigate('MinhaConta')} activeOpacity={0.7}>
             <Ionicons name="person-outline" size={26} color={cores.textoSuave} />
             <Text style={estilos.cardGradeTitulo}>Minha Conta</Text>
             <Text style={estilos.cardGradeDescricao}>Gerencie suas configurações pessoais</Text>
