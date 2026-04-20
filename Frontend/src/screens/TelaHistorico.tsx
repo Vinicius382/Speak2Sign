@@ -13,18 +13,20 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/NavegacaoPrincipal';
-import { cores } from '../theme/cores';
+import { useCores } from '../theme/useCores';
+import type { Cores } from '../theme/cores';
 import BarraInferior from '../components/BarraInferior';
 import BotaoVoltar from '../components/BotaoVoltar';
 import CampoBusca from '../components/CampoBusca';
 import CardsEstatisticas, { FiltroTipo } from '../components/CardsEstatisticas';
 import CardItem from '../components/CardItem';
 import { useHistoricoFavoritos } from '../contexts/HistoricoFavoritosProvider';
-
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 const TelaHistorico: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
+  const { cores, estaEscuro, fatorFonte } = useCores();
+  const estilos = useMemo(() => criarEstilos(cores, fatorFonte), [cores, fatorFonte]);
   const {
     historico,
     removerDoHistorico,
@@ -80,7 +82,7 @@ const TelaHistorico: React.FC = () => {
 
   return (
     <SafeAreaView style={estilos.container} edges={['top']}>
-      <StatusBar barStyle="dark-content" backgroundColor={cores.fundo} />
+      <StatusBar barStyle={estaEscuro ? 'light-content' : 'dark-content'} backgroundColor={cores.fundo} />
 
       {/* Cabeçalho */}
       <View style={estilos.cabecalho}>
@@ -149,7 +151,7 @@ const TelaHistorico: React.FC = () => {
   );
 };
 
-const estilos = StyleSheet.create({
+const criarEstilos = (cores: Cores, fatorFonte: number = 1) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: cores.fundo,
@@ -166,12 +168,12 @@ const estilos = StyleSheet.create({
     flex: 1,
   },
   titulo: {
-    fontSize: 20,
+    fontSize: Math.round(20 * fatorFonte),
     fontWeight: '700',
     color: cores.textoPrincipal,
   },
   subtitulo: {
-    fontSize: 14,
+    fontSize: Math.round(14 * fatorFonte),
     color: cores.iconeTeal,
     marginTop: 2,
   },
@@ -191,7 +193,7 @@ const estilos = StyleSheet.create({
     paddingVertical: 60,
   },
   vazioTexto: {
-    fontSize: 16,
+    fontSize: Math.round(16 * fatorFonte),
     color: cores.textoSuave,
     marginTop: 16,
   },

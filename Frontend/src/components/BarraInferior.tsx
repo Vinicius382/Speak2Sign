@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/NavegacaoPrincipal';
 import { Ionicons } from '@expo/vector-icons';
-import { cores } from '../theme/cores';
+import { useCores } from '../theme/useCores';
+import type { Cores } from '../theme/cores';
 
 type ItemBarra = {
   icone: keyof typeof Ionicons.glyphMap;
@@ -25,9 +26,18 @@ const itens: ItemBarra[] = [
 
 const BarraInferior: React.FC<BarraInferiorProps> = ({ telaAtiva = 'Início' }) => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const { cores, fatorFonte } = useCores();
+  const estilos = useMemo(() => criarEstilos(cores, fatorFonte), [cores, fatorFonte]);
 
   const lidarComClique = (item: ItemBarra) => {
-    navigation.navigate(item.rota as any);
+    if (item.rota === 'Inicial') {
+      navigation.reset({ index: 0, routes: [{ name: 'Inicial' }] });
+    } else {
+      navigation.reset({
+        index: 1,
+        routes: [{ name: 'Inicial' }, { name: item.rota as any }],
+      });
+    }
   };
 
   return (
@@ -60,7 +70,7 @@ const BarraInferior: React.FC<BarraInferiorProps> = ({ telaAtiva = 'Início' }) 
   );
 };
 
-const estilos = StyleSheet.create({
+const criarEstilos = (cores: Cores, fatorFonte: number = 1) => StyleSheet.create({
   barraInferior: {
     position: 'absolute',
     bottom: 0,
@@ -73,7 +83,7 @@ const estilos = StyleSheet.create({
     paddingVertical: 10,
     paddingBottom: 28,
     borderTopWidth: 1,
-    borderTopColor: '#F0F0F0',
+    borderTopColor: cores.divisor,
     shadowColor: cores.sombra,
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.04,
@@ -85,7 +95,7 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
   textoBarra: {
-    fontSize: 11,
+    fontSize: Math.round(11 * fatorFonte),
     color: cores.textoSuave,
     marginTop: 4,
     fontWeight: '500',

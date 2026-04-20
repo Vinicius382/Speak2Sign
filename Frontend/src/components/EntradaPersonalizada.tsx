@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   TextInput,
@@ -8,7 +8,8 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { cores } from '../theme/cores';
+import { useCores } from '../theme/useCores';
+import type { Cores } from '../theme/cores';
 
 interface EntradaPersonalizadaProps {
   placeholder: string;
@@ -35,6 +36,9 @@ const EntradaPersonalizada: React.FC<EntradaPersonalizadaProps> = ({
 }) => {
   const [estaFocado, setEstaFocado] = useState(false);
   const [senhaVisivel, setSenhaVisivel] = useState(false);
+  
+  const { cores, fatorFonte } = useCores();
+  const estilos = useMemo(() => criarEstilos(cores, fatorFonte), [cores, fatorFonte]);
 
   const corBorda = erro
     ? cores.erro
@@ -79,12 +83,12 @@ const EntradaPersonalizada: React.FC<EntradaPersonalizadaProps> = ({
   );
 };
 
-const estilos = StyleSheet.create({
+const criarEstilos = (cores: Cores, fatorFonte: number = 1) => StyleSheet.create({
   container: {
     marginBottom: 20,
   },
   rotulo: {
-    fontSize: 14,
+    fontSize: Math.round(14 * fatorFonte),
     fontWeight: '600',
     color: cores.textoSecundario,
     marginBottom: 8,
@@ -107,7 +111,7 @@ const estilos = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 18,
     paddingVertical: 14,
-    fontSize: 16,
+    fontSize: Math.round(16 * fatorFonte),
     color: cores.textoPrincipal,
   },
   inputComIcone: {
@@ -121,7 +125,7 @@ const estilos = StyleSheet.create({
     alignItems: 'center',
   },
   textoErro: {
-    fontSize: 12,
+    fontSize: Math.round(12 * fatorFonte),
     color: cores.erro,
     marginTop: 6,
     marginLeft: 4,

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -14,7 +14,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/NavegacaoPrincipal';
-import { cores } from '../theme/cores';
+import { useCores } from '../theme/useCores';
+import type { Cores } from '../theme/cores';
 import BarraInferior from '../components/BarraInferior';
 import {
   ExpoSpeechRecognitionModule,
@@ -33,6 +34,9 @@ const TelaFalarMensagem: React.FC = () => {
   const [transcricaoParcial, setTranscricaoParcial] = useState('');
   const [erro, setErro] = useState('');
   const { adicionarAoHistorico } = useHistoricoFavoritos();
+
+  const { cores, fatorFonte } = useCores();
+  const estilos = useMemo(() => criarEstilos(cores, fatorFonte), [cores, fatorFonte]);
 
   // Animações
   const pulseAnim = useRef(new Animated.Value(1)).current;
@@ -307,7 +311,7 @@ const TelaFalarMensagem: React.FC = () => {
   );
 };
 
-const estilos = StyleSheet.create({
+const criarEstilos = (cores: Cores, fatorFonte: number = 1) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: cores.fundo,
@@ -320,7 +324,7 @@ const estilos = StyleSheet.create({
     paddingBottom: 8,
   },
   titulo: {
-    fontSize: 20,
+    fontSize: Math.round(20 * fatorFonte),
     fontWeight: '700',
     color: cores.textoPrincipal,
   },
@@ -374,23 +378,23 @@ const estilos = StyleSheet.create({
   },
   microfoneLabel: {
     marginTop: 16,
-    fontSize: 14,
+    fontSize: Math.round(14 * fatorFonte),
     fontWeight: '500',
     color: cores.textoSecundario,
   },
   erroContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFF5F5',
+    backgroundColor: cores.erroFundo,
     borderRadius: 12,
     padding: 12,
     marginBottom: 16,
     gap: 8,
     borderWidth: 1,
-    borderColor: '#FECACA',
+    borderColor: cores.erroBorda,
   },
   erroTexto: {
-    fontSize: 13,
+    fontSize: Math.round(13 * fatorFonte),
     color: cores.erro,
     flex: 1,
   },
@@ -404,7 +408,7 @@ const estilos = StyleSheet.create({
     marginBottom: 10,
   },
   transcricaoLabel: {
-    fontSize: 14,
+    fontSize: Math.round(14 * fatorFonte),
     fontWeight: '500',
     color: cores.textoSecundario,
   },
@@ -417,7 +421,7 @@ const estilos = StyleSheet.create({
     minHeight: 120,
   },
   transcricaoTexto: {
-    fontSize: 15,
+    fontSize: Math.round(15 * fatorFonte),
     color: cores.textoPrincipal,
     lineHeight: 22,
   },
@@ -426,7 +430,7 @@ const estilos = StyleSheet.create({
     fontStyle: 'italic',
   },
   transcricaoPlaceholder: {
-    fontSize: 15,
+    fontSize: Math.round(15 * fatorFonte),
     color: cores.inputPlaceholder,
     fontStyle: 'italic',
   },
@@ -445,7 +449,7 @@ const estilos = StyleSheet.create({
     opacity: 0.5,
   },
   botaoConverterTexto: {
-    fontSize: 16,
+    fontSize: Math.round(16 * fatorFonte),
     fontWeight: '700',
     color: '#FFFFFF',
   },

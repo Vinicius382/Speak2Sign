@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   StyleSheet,
@@ -13,7 +13,8 @@ import EntradaPersonalizada from '../components/EntradaPersonalizada';
 import BotaoPrincipal from '../components/BotaoPrincipal';
 import TextoLink from '../components/TextoLink';
 import { cadastrarUsuario } from '../services/api';
-import { cores } from '../theme/cores';
+import { useCores } from '../theme/useCores';
+import type { Cores } from '../theme/cores';
 
 type RootStackParamList = {
   Login: undefined;
@@ -37,6 +38,9 @@ const TelaCadastro: React.FC<TelaCadastroProps> = ({ navigation }) => {
     senha?: string;
     confirmarSenha?: string;
   }>({});
+
+  const { cores, fatorFonte } = useCores();
+  const estilos = useMemo(() => criarEstilos(cores, fatorFonte), [cores, fatorFonte]);
 
   const validar = (): boolean => {
     const novosErros: typeof erros = {};
@@ -156,7 +160,7 @@ const TelaCadastro: React.FC<TelaCadastroProps> = ({ navigation }) => {
   );
 };
 
-const estilos = StyleSheet.create({
+const criarEstilos = (cores: Cores, fatorFonte: number = 1) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: cores.fundo,

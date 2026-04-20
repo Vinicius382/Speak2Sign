@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -7,12 +7,15 @@ import {
   TouchableOpacity,
   Switch,
   Alert,
+  StatusBar,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/NavegacaoPrincipal';
-import { cores } from '../theme/cores';
+import { useCores } from '../theme/useCores';
+import type { Cores } from '../theme/cores';
 import { useAuth } from '../contexts/AuthProvider';
 import { useConfiguracoes } from '../contexts/ConfiguracoesProvider';
 import type { TamanhoFonte, VelocidadeAvatar } from '../contexts/ConfiguracoesProvider';
@@ -21,97 +24,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
-// Componente de item de menu navegável
-const ItemMenu: React.FC<{
-  icone: keyof typeof Ionicons.glyphMap;
-  titulo: string;
-  subtitulo?: string;
-  aoClicar: () => void;
-  corIcone?: string;
-  perigo?: boolean;
-}> = ({ icone, titulo, subtitulo, aoClicar, corIcone, perigo }) => (
-  <TouchableOpacity style={estilos.itemMenu} onPress={aoClicar} activeOpacity={0.6}>
-    <View style={[estilos.itemMenuIcone, perigo && { backgroundColor: '#FDECEA' }]}>
-      <Ionicons name={icone} size={20} color={perigo ? cores.erro : (corIcone || cores.iconeTeal)} />
-    </View>
-    <View style={estilos.itemMenuTexto}>
-      <Text style={[estilos.itemMenuTitulo, perigo && { color: cores.erro }]}>{titulo}</Text>
-      {subtitulo && <Text style={estilos.itemMenuSubtitulo}>{subtitulo}</Text>}
-    </View>
-    <Ionicons name="chevron-forward" size={18} color={cores.textoSuave} />
-  </TouchableOpacity>
-);
-
-// Componente de toggle
-const ItemToggle: React.FC<{
-  icone: keyof typeof Ionicons.glyphMap;
-  titulo: string;
-  subtitulo?: string;
-  valor: boolean;
-  aoMudar: (valor: boolean) => void;
-  corIcone?: string;
-}> = ({ icone, titulo, subtitulo, valor, aoMudar, corIcone }) => (
-  <View style={estilos.itemMenu}>
-    <View style={estilos.itemMenuIcone}>
-      <Ionicons name={icone} size={20} color={corIcone || cores.iconeTeal} />
-    </View>
-    <View style={estilos.itemMenuTexto}>
-      <Text style={estilos.itemMenuTitulo}>{titulo}</Text>
-      {subtitulo && <Text style={estilos.itemMenuSubtitulo}>{subtitulo}</Text>}
-    </View>
-    <Switch
-      value={valor}
-      onValueChange={aoMudar}
-      trackColor={{ false: '#E0E0E0', true: '#A5D6A7' }}
-      thumbColor={valor ? cores.destaque : '#F5F5F5'}
-    />
-  </View>
-);
-
-// Componente seletor de opções
-const ItemSeletor: React.FC<{
-  icone: keyof typeof Ionicons.glyphMap;
-  titulo: string;
-  opcoes: { rotulo: string; valor: string }[];
-  valorAtual: string;
-  aoMudar: (valor: string) => void;
-  corIcone?: string;
-}> = ({ icone, titulo, opcoes, valorAtual, aoMudar, corIcone }) => (
-  <View style={estilos.itemSeletor}>
-    <View style={estilos.itemSeletorCabecalho}>
-      <View style={estilos.itemMenuIcone}>
-        <Ionicons name={icone} size={20} color={corIcone || cores.iconeTeal} />
-      </View>
-      <Text style={estilos.itemMenuTitulo}>{titulo}</Text>
-    </View>
-    <View style={estilos.seletorOpcoes}>
-      {opcoes.map((opcao) => (
-        <TouchableOpacity
-          key={opcao.valor}
-          style={[
-            estilos.seletorBotao,
-            valorAtual === opcao.valor && estilos.seletorBotaoAtivo,
-          ]}
-          onPress={() => aoMudar(opcao.valor)}
-          activeOpacity={0.7}
-        >
-          <Text
-            style={[
-              estilos.seletorBotaoTexto,
-              valorAtual === opcao.valor && estilos.seletorBotaoTextoAtivo,
-            ]}
-          >
-            {opcao.rotulo}
-          </Text>
-        </TouchableOpacity>
-      ))}
-    </View>
-  </View>
-);
-
 const TelaMinhaConta: React.FC = () => {
-  const navigation = useNavigation<NavigationProp>();
   const { usuario, limparUsuario } = useAuth();
+  const navigation = useNavigation<NavigationProp>();
+  const { cores, estaEscuro, fatorFonte } = useCores();
+  const estilos = useMemo(() => criarEstilos(cores, fatorFonte), [cores, fatorFonte]);
   const {
     config,
     setTemaEscuro,
@@ -128,6 +45,94 @@ const TelaMinhaConta: React.FC = () => {
         .substring(0, 2)
         .toUpperCase()
     : '??';
+
+  // Componente de item de menu navegável
+  const ItemMenu: React.FC<{
+    icone: keyof typeof Ionicons.glyphMap;
+    titulo: string;
+    subtitulo?: string;
+    aoClicar: () => void;
+    corIcone?: string;
+    perigo?: boolean;
+  }> = ({ icone, titulo, subtitulo, aoClicar, corIcone, perigo }) => (
+    <TouchableOpacity style={estilos.itemMenu} onPress={aoClicar} activeOpacity={0.6}>
+      <View style={[estilos.itemMenuIcone, perigo && { backgroundColor: cores.perigo }]}>
+        <Ionicons name={icone} size={20} color={perigo ? cores.erro : (corIcone || cores.iconeTeal)} />
+      </View>
+      <View style={estilos.itemMenuTexto}>
+        <Text style={[estilos.itemMenuTitulo, perigo && { color: cores.erro }]}>{titulo}</Text>
+        {subtitulo && <Text style={estilos.itemMenuSubtitulo}>{subtitulo}</Text>}
+      </View>
+      <Ionicons name="chevron-forward" size={18} color={cores.textoSuave} />
+    </TouchableOpacity>
+  );
+
+  // Componente de toggle
+  const ItemToggle: React.FC<{
+    icone: keyof typeof Ionicons.glyphMap;
+    titulo: string;
+    subtitulo?: string;
+    valor: boolean;
+    aoMudar: (valor: boolean) => void;
+    corIcone?: string;
+  }> = ({ icone, titulo, subtitulo, valor, aoMudar, corIcone }) => (
+    <View style={estilos.itemMenu}>
+      <View style={estilos.itemMenuIcone}>
+        <Ionicons name={icone} size={20} color={corIcone || cores.iconeTeal} />
+      </View>
+      <View style={estilos.itemMenuTexto}>
+        <Text style={estilos.itemMenuTitulo}>{titulo}</Text>
+        {subtitulo && <Text style={estilos.itemMenuSubtitulo}>{subtitulo}</Text>}
+      </View>
+      <Switch
+        value={valor}
+        onValueChange={aoMudar}
+        trackColor={{ false: cores.inputBorda, true: '#A5D6A7' }}
+        thumbColor={valor ? cores.destaque : cores.superficie}
+      />
+    </View>
+  );
+
+  // Componente seletor de opções
+  const ItemSeletor: React.FC<{
+    icone: keyof typeof Ionicons.glyphMap;
+    titulo: string;
+    opcoes: { rotulo: string; valor: string }[];
+    valorAtual: string;
+    aoMudar: (valor: string) => void;
+    corIcone?: string;
+  }> = ({ icone, titulo, opcoes, valorAtual, aoMudar, corIcone }) => (
+    <View style={estilos.itemSeletor}>
+      <View style={estilos.itemSeletorCabecalho}>
+        <View style={estilos.itemMenuIcone}>
+          <Ionicons name={icone} size={20} color={corIcone || cores.iconeTeal} />
+        </View>
+        <Text style={estilos.itemMenuTitulo}>{titulo}</Text>
+      </View>
+      <View style={estilos.seletorOpcoes}>
+        {opcoes.map((opcao) => (
+          <TouchableOpacity
+            key={opcao.valor}
+            style={[
+              estilos.seletorBotao,
+              valorAtual === opcao.valor && estilos.seletorBotaoAtivo,
+            ]}
+            onPress={() => aoMudar(opcao.valor)}
+            activeOpacity={0.7}
+          >
+            <Text
+              style={[
+                estilos.seletorBotaoTexto,
+                valorAtual === opcao.valor && estilos.seletorBotaoTextoAtivo,
+              ]}
+            >
+              {opcao.rotulo}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+    </View>
+  );
 
   const confirmarLimparDados = () => {
     Alert.alert(
@@ -173,7 +178,8 @@ const TelaMinhaConta: React.FC = () => {
   };
 
   return (
-    <View style={estilos.container}>
+    <SafeAreaView style={estilos.container} edges={['top']}>
+      <StatusBar barStyle={estaEscuro ? 'light-content' : 'dark-content'} backgroundColor={cores.fundo} />
       <ScrollView
         contentContainerStyle={estilos.conteudoScroll}
         showsVerticalScrollIndicator={false}
@@ -283,11 +289,11 @@ const TelaMinhaConta: React.FC = () => {
 
         <View style={{ height: 40 }} />
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 
-const estilos = StyleSheet.create({
+const criarEstilos = (cores: Cores, fatorFonte: number = 1) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: cores.fundo,
@@ -302,11 +308,11 @@ const estilos = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingTop: 60,
-    paddingBottom: 20,
+    paddingTop: 16,
+    paddingBottom: 8,
   },
   tituloCabecalho: {
-    fontSize: 18,
+    fontSize: Math.round(18 * fatorFonte),
     fontWeight: '700',
     color: cores.textoPrincipal,
   },
@@ -335,7 +341,7 @@ const estilos = StyleSheet.create({
     marginRight: 16,
   },
   avatarTexto: {
-    fontSize: 20,
+    fontSize: Math.round(20 * fatorFonte),
     fontWeight: '700',
     color: '#FFF',
   },
@@ -343,19 +349,19 @@ const estilos = StyleSheet.create({
     flex: 1,
   },
   perfilNome: {
-    fontSize: 18,
+    fontSize: Math.round(18 * fatorFonte),
     fontWeight: '700',
     color: cores.textoPrincipal,
     marginBottom: 4,
   },
   perfilEmail: {
-    fontSize: 14,
+    fontSize: Math.round(14 * fatorFonte),
     color: cores.textoSecundario,
   },
 
   // Seções
   rotuloSecao: {
-    fontSize: 11,
+    fontSize: Math.round(11 * fatorFonte),
     fontWeight: '600',
     color: cores.textoSuave,
     letterSpacing: 1.5,
@@ -375,7 +381,7 @@ const estilos = StyleSheet.create({
   },
   divisor: {
     height: 1,
-    backgroundColor: '#F0F0F0',
+    backgroundColor: cores.divisor,
     marginHorizontal: 16,
   },
 
@@ -390,7 +396,7 @@ const estilos = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 10,
-    backgroundColor: '#F0F4F4',
+    backgroundColor: cores.fundoIcone,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 14,
@@ -399,12 +405,12 @@ const estilos = StyleSheet.create({
     flex: 1,
   },
   itemMenuTitulo: {
-    fontSize: 15,
+    fontSize: Math.round(15 * fatorFonte),
     fontWeight: '600',
     color: cores.textoPrincipal,
   },
   itemMenuSubtitulo: {
-    fontSize: 12,
+    fontSize: Math.round(12 * fatorFonte),
     color: cores.textoSecundario,
     marginTop: 2,
   },
@@ -421,7 +427,7 @@ const estilos = StyleSheet.create({
   },
   seletorOpcoes: {
     flexDirection: 'row',
-    backgroundColor: '#F0F2F5',
+    backgroundColor: cores.seletorFundo,
     borderRadius: 12,
     padding: 3,
   },
@@ -440,7 +446,7 @@ const estilos = StyleSheet.create({
     elevation: 2,
   },
   seletorBotaoTexto: {
-    fontSize: 13,
+    fontSize: Math.round(13 * fatorFonte),
     fontWeight: '500',
     color: cores.textoSecundario,
   },
@@ -461,7 +467,7 @@ const estilos = StyleSheet.create({
     gap: 8,
   },
   botaoSairTexto: {
-    fontSize: 16,
+    fontSize: Math.round(16 * fatorFonte),
     fontWeight: '700',
     color: '#FFF',
   },

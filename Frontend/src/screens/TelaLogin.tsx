@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   StyleSheet,
@@ -13,7 +13,8 @@ import EntradaPersonalizada from '../components/EntradaPersonalizada';
 import BotaoPrincipal from '../components/BotaoPrincipal';
 import TextoLink from '../components/TextoLink';
 import { loginUsuario } from '../services/api';
-import { cores } from '../theme/cores';
+import { useCores } from '../theme/useCores';
+import type { Cores } from '../theme/cores';
 import { useAuth } from '../contexts/AuthProvider';
 
 type RootStackParamList = {
@@ -33,6 +34,9 @@ const TelaLogin: React.FC<TelaLoginProps> = ({ navigation }) => {
   const [carregando, setCarregando] = useState(false);
   const [erros, setErros] = useState<{ email?: string; senha?: string }>({});
   const { salvarUsuario } = useAuth();
+  
+  const { cores, fatorFonte } = useCores();
+  const estilos = useMemo(() => criarEstilos(cores, fatorFonte), [cores, fatorFonte]);
 
   const validar = (): boolean => {
     const novosErros: { email?: string; senha?: string } = {};
@@ -132,7 +136,7 @@ const TelaLogin: React.FC<TelaLoginProps> = ({ navigation }) => {
   );
 };
 
-const estilos = StyleSheet.create({
+const criarEstilos = (cores: Cores, fatorFonte: number = 1) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: cores.fundo,

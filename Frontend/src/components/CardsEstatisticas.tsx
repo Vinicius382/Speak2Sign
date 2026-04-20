@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { cores } from '../theme/cores';
+import { useCores } from '../theme/useCores';
+import type { Cores } from '../theme/cores';
 import type { TipoTraducao } from '../contexts/HistoricoFavoritosProvider';
 
 export type FiltroTipo = 'todos' | TipoTraducao;
@@ -23,6 +24,9 @@ const CardsEstatisticas: React.FC<CardsEstatisticasProps> = ({
   filtroAtivo,
   aoSelecionarFiltro,
 }) => {
+  const { cores, fatorFonte } = useCores();
+  const estilos = useMemo(() => criarEstilos(cores, fatorFonte), [cores, fatorFonte]);
+
   const cards: { chave: FiltroTipo; rotulo: string; valor: number }[] = [
     { chave: 'todos', rotulo: 'Total', valor: estatisticas.total },
     { chave: 'voz', rotulo: 'Voz', valor: estatisticas.voz },
@@ -50,7 +54,7 @@ const CardsEstatisticas: React.FC<CardsEstatisticasProps> = ({
   );
 };
 
-const estilos = StyleSheet.create({
+const criarEstilos = (cores: Cores, fatorFonte: number = 1) => StyleSheet.create({
   container: {
     flexDirection: 'row',
     gap: 10,
@@ -70,12 +74,12 @@ const estilos = StyleSheet.create({
     borderWidth: 2,
   },
   numero: {
-    fontSize: 20,
+    fontSize: Math.round(20 * fatorFonte),
     fontWeight: 'bold',
     color: cores.iconeTeal,
   },
   rotulo: {
-    fontSize: 11,
+    fontSize: Math.round(11 * fatorFonte),
     color: cores.textoSecundario,
     marginTop: 2,
     fontWeight: '500',

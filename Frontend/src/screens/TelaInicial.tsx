@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -6,18 +6,23 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  StatusBar,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/NavegacaoPrincipal';
-import { cores } from '../theme/cores';
+import { useCores } from '../theme/useCores';
+import type { Cores } from '../theme/cores';
 import BarraInferior from '../components/BarraInferior';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 const TelaInicial: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
+  const { cores, estaEscuro, fatorFonte } = useCores();
+  const estilos = useMemo(() => criarEstilos(cores, fatorFonte), [cores, fatorFonte]);
 
   const avisoEmBreve = () => {
     Alert.alert('Em breve', 'Funcionalidade em desenvolvimento.');
@@ -27,7 +32,8 @@ const TelaInicial: React.FC = () => {
   const navegarParaHistorico = () => navigation.navigate('Historico');
 
   return (
-    <View style={estilos.container}>
+    <SafeAreaView style={estilos.container} edges={['top']}>
+      <StatusBar barStyle={estaEscuro ? 'light-content' : 'dark-content'} backgroundColor={cores.fundo} />
       <ScrollView
         contentContainerStyle={estilos.conteudoScroll}
         showsVerticalScrollIndicator={false}
@@ -101,43 +107,44 @@ const TelaInicial: React.FC = () => {
 
       {/* Barra de navegação inferior */}
       <BarraInferior telaAtiva="Início" />
-    </View>
+    </SafeAreaView>
   );
 };
 
-const estilos = StyleSheet.create({
+const criarEstilos = (cores: Cores, fatorFonte: number = 1) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: cores.fundo,
   },
   conteudoScroll: {
-    paddingHorizontal: 20,
     paddingBottom: 100,
   },
 
   cabecalho: {
-    paddingTop: 60,
+    paddingHorizontal: 20,
+    paddingTop: 16,
     paddingBottom: 24,
   },
   titulo: {
-    fontSize: 32,
+    fontSize: Math.round(32 * fatorFonte),
     fontWeight: '300',
     fontStyle: 'italic',
-    color: '#333',
+    color: cores.textoPrincipal,
     marginBottom: 2,
   },
   subtitulo: {
-    fontSize: 15,
+    fontSize: Math.round(15 * fatorFonte),
     color: cores.textoSecundario,
     marginTop: 4,
   },
 
   rotuloSecao: {
-    fontSize: 11,
+    fontSize: Math.round(11 * fatorFonte),
     fontWeight: '600',
     color: cores.textoSuave,
     letterSpacing: 1.5,
     marginBottom: 12,
+    paddingHorizontal: 20,
   },
 
   cardPrincipal: {
@@ -147,6 +154,7 @@ const estilos = StyleSheet.create({
     borderRadius: 16,
     padding: 20,
     marginBottom: 28,
+    marginHorizontal: 20,
     shadowColor: cores.sombra,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
@@ -157,7 +165,7 @@ const estilos = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 14,
-    backgroundColor: '#F0F4F4',
+    backgroundColor: cores.fundoIcone,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 16,
@@ -169,7 +177,7 @@ const estilos = StyleSheet.create({
     width: 16,
     height: 16,
     borderRadius: 8,
-    backgroundColor: '#E8F0F0',
+    backgroundColor: cores.superficie,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -177,22 +185,23 @@ const estilos = StyleSheet.create({
     flex: 1,
   },
   cardPrincipalTitulo: {
-    fontSize: 16,
+    fontSize: Math.round(16 * fatorFonte),
     fontWeight: '700',
     color: cores.textoPrincipal,
     marginBottom: 4,
   },
   cardPrincipalDescricao: {
-    fontSize: 13,
+    fontSize: Math.round(13 * fatorFonte),
     color: cores.textoSecundario,
     lineHeight: 18,
   },
 
   rotuloMeuEspaco: {
-    fontSize: 16,
+    fontSize: Math.round(16 * fatorFonte),
     fontWeight: '600',
     color: cores.textoSecundario,
     marginBottom: 14,
+    paddingHorizontal: 20,
   },
 
   // Grade 2x2
@@ -200,6 +209,7 @@ const estilos = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
+    paddingHorizontal: 20,
   },
   cardGrade: {
     width: '48%',
@@ -214,14 +224,14 @@ const estilos = StyleSheet.create({
     elevation: 2,
   },
   cardGradeTitulo: {
-    fontSize: 15,
+    fontSize: Math.round(15 * fatorFonte),
     fontWeight: '700',
     color: cores.textoPrincipal,
     marginTop: 10,
     marginBottom: 6,
   },
   cardGradeDescricao: {
-    fontSize: 12,
+    fontSize: Math.round(12 * fatorFonte),
     color: cores.textoSecundario,
     lineHeight: 16,
   },

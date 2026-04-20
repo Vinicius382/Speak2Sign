@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -15,7 +15,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/NavegacaoPrincipal';
-import { cores } from '../theme/cores';
+import { useCores } from '../theme/useCores';
+import type { Cores } from '../theme/cores';
 import BarraInferior from '../components/BarraInferior';
 import BotaoVoltar from '../components/BotaoVoltar';
 import IndicadoresProgresso from '../components/IndicadoresProgresso';
@@ -34,6 +35,9 @@ const TelaDigitarMensagem: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
   const [mensagem, setMensagem] = useState('');
   const { adicionarAoHistorico } = useHistoricoFavoritos();
+
+  const { cores, fatorFonte } = useCores();
+  const estilos = useMemo(() => criarEstilos(cores, fatorFonte), [cores, fatorFonte]);
 
   const selecionarSugestao = (sugestao: string) => {
     setMensagem(sugestao);
@@ -119,7 +123,7 @@ const TelaDigitarMensagem: React.FC = () => {
   );
 };
 
-const estilos = StyleSheet.create({
+const criarEstilos = (cores: Cores, fatorFonte: number = 1) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: cores.fundo,
@@ -135,7 +139,7 @@ const estilos = StyleSheet.create({
     paddingBottom: 8,
   },
   titulo: {
-    fontSize: 20,
+    fontSize: Math.round(20 * fatorFonte),
     fontWeight: '700',
     color: cores.textoPrincipal,
   },
@@ -145,7 +149,7 @@ const estilos = StyleSheet.create({
     paddingBottom: 100,
   },
   rotuloSugestoes: {
-    fontSize: 14,
+    fontSize: Math.round(14 * fatorFonte),
     fontWeight: '500',
     color: cores.textoSecundario,
     marginBottom: 12,
@@ -165,7 +169,7 @@ const estilos = StyleSheet.create({
     borderColor: cores.inputBorda,
   },
   chipTexto: {
-    fontSize: 13,
+    fontSize: Math.round(13 * fatorFonte),
     color: cores.textoSecundario,
     fontWeight: '500',
   },
@@ -180,7 +184,7 @@ const estilos = StyleSheet.create({
   input: {
     flex: 1,
     padding: 16,
-    fontSize: 15,
+    fontSize: Math.round(15 * fatorFonte),
     color: cores.textoPrincipal,
     minHeight: 140,
   },
@@ -199,7 +203,7 @@ const estilos = StyleSheet.create({
     opacity: 0.5,
   },
   botaoConverterTexto: {
-    fontSize: 16,
+    fontSize: Math.round(16 * fatorFonte),
     fontWeight: '700',
     color: '#FFFFFF',
   },

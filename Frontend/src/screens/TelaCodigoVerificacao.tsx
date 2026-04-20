@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -15,7 +15,8 @@ import CabecalhoAutenticacao from '../components/CabecalhoAutenticacao';
 import BotaoPrincipal from '../components/BotaoPrincipal';
 import TextoLink from '../components/TextoLink';
 import { solicitarRedefinicaoSenha } from '../services/api';
-import { cores } from '../theme/cores';
+import { useCores } from '../theme/useCores';
+import type { Cores } from '../theme/cores';
 
 type RootStackParamList = {
   Login: undefined;
@@ -38,6 +39,9 @@ const TelaCodigoVerificacao: React.FC<TelaCodigoVerificacaoProps> = ({ navigatio
   const [tempoRestante, setTempoRestante] = useState(60);
   const dataExpiracaoRef = useRef<number | null>(Date.now() + 60000);
   const inputsRef = useRef<(TextInput | null)[]>([]);
+
+  const { cores, fatorFonte } = useCores();
+  const estilos = useMemo(() => criarEstilos(cores, fatorFonte), [cores, fatorFonte]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -188,7 +192,7 @@ const TelaCodigoVerificacao: React.FC<TelaCodigoVerificacaoProps> = ({ navigatio
   );
 };
 
-const estilos = StyleSheet.create({
+const criarEstilos = (cores: Cores, fatorFonte: number = 1) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: cores.fundo,
@@ -201,7 +205,7 @@ const estilos = StyleSheet.create({
     height: 80,
   },
   instrucao: {
-    fontSize: 15,
+    fontSize: Math.round(15 * fatorFonte),
     color: cores.textoSecundario,
     textAlign: 'center',
     lineHeight: 22,
@@ -224,20 +228,20 @@ const estilos = StyleSheet.create({
     borderRadius: 14,
     backgroundColor: cores.inputFundo,
     textAlign: 'center',
-    fontSize: 22,
+    fontSize: Math.round(22 * fatorFonte),
     fontWeight: '700',
     color: cores.textoPrincipal,
   },
   inputDigitoPreenchido: {
     borderColor: cores.destaque,
-    backgroundColor: '#F0F8F0',
+    backgroundColor: cores.codigoPreenchidoFundo,
   },
   containerReenviar: {
     alignItems: 'center',
     marginTop: 8,
   },
   textoTempo: {
-    fontSize: 14,
+    fontSize: Math.round(14 * fatorFonte),
     color: cores.textoSecundario,
   },
   tempoDestaque: {

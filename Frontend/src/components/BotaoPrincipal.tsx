@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   TouchableOpacity,
   Text,
@@ -7,7 +7,8 @@ import {
   ActivityIndicator,
   View,
 } from 'react-native';
-import { cores } from '../theme/cores';
+import { useCores } from '../theme/useCores';
+import type { Cores } from '../theme/cores';
 
 interface BotaoPrincipalProps {
   titulo: string;
@@ -24,6 +25,9 @@ const BotaoPrincipal: React.FC<BotaoPrincipalProps> = ({
   desativado = false,
   estilo,
 }) => {
+  const { cores, fatorFonte } = useCores();
+  const estilos = useMemo(() => criarEstilos(cores, fatorFonte), [cores, fatorFonte]);
+
   return (
     <View style={estilo}>
       <TouchableOpacity
@@ -48,7 +52,7 @@ const BotaoPrincipal: React.FC<BotaoPrincipalProps> = ({
   );
 };
 
-const estilos = StyleSheet.create({
+const criarEstilos = (cores: Cores, fatorFonte: number = 1) => StyleSheet.create({
   botao: {
     paddingVertical: 16,
     borderRadius: 14,
@@ -67,7 +71,7 @@ const estilos = StyleSheet.create({
   },
   texto: {
     color: '#FFFFFF',
-    fontSize: 18,
+    fontSize: Math.round(18 * fatorFonte),
     fontWeight: '700',
     letterSpacing: 0.5,
   },

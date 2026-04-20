@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -7,11 +7,14 @@ import {
   Platform,
   ScrollView,
   Alert,
+  StatusBar,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/NavegacaoPrincipal';
-import { cores } from '../theme/cores';
+import { useCores } from '../theme/useCores';
+import type { Cores } from '../theme/cores';
 import { useAuth } from '../contexts/AuthProvider';
 import { alterarSenhaApi } from '../services/api';
 import BotaoVoltar from '../components/BotaoVoltar';
@@ -32,6 +35,9 @@ const TelaAlterarSenha: React.FC = () => {
     novaSenha?: string;
     confirmarSenha?: string;
   }>({});
+
+  const { cores, estaEscuro, fatorFonte } = useCores();
+  const estilos = useMemo(() => criarEstilos(cores, fatorFonte), [cores, fatorFonte]);
 
   const validar = (): boolean => {
     const novosErros: typeof erros = {};
@@ -79,11 +85,13 @@ const TelaAlterarSenha: React.FC = () => {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={estilos.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <ScrollView
+    <SafeAreaView style={estilos.container} edges={['top']}>
+      <StatusBar barStyle={estaEscuro ? 'light-content' : 'dark-content'} backgroundColor={cores.fundo} />
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <ScrollView
         contentContainerStyle={estilos.conteudoScroll}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
@@ -98,7 +106,7 @@ const TelaAlterarSenha: React.FC = () => {
         {/* Descrição */}
         <View style={estilos.descricaoCard}>
           <View style={estilos.descricaoIcone}>
-            <Text style={{ fontSize: 28 }}>🔒</Text>
+            <Text style={{ fontSize: Math.round(28 * fatorFonte) }}>🔒</Text>
           </View>
           <Text style={estilos.descricaoTexto}>
             Para sua segurança, informe sua senha atual antes de definir uma nova senha.
@@ -152,10 +160,11 @@ const TelaAlterarSenha: React.FC = () => {
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
-const estilos = StyleSheet.create({
+const criarEstilos = (cores: Cores, fatorFonte: number = 1) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: cores.fundo,
@@ -170,11 +179,11 @@ const estilos = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingTop: 60,
-    paddingBottom: 20,
+    paddingTop: 16,
+    paddingBottom: 8,
   },
   tituloCabecalho: {
-    fontSize: 18,
+    fontSize: Math.round(18 * fatorFonte),
     fontWeight: '700',
     color: cores.textoPrincipal,
   },
@@ -195,7 +204,7 @@ const estilos = StyleSheet.create({
     marginBottom: 12,
   },
   descricaoTexto: {
-    fontSize: 14,
+    fontSize: Math.round(14 * fatorFonte),
     color: cores.textoSecundario,
     textAlign: 'center',
     lineHeight: 20,

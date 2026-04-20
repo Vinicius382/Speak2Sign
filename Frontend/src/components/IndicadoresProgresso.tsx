@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, StyleSheet, StyleProp, ViewStyle } from 'react-native';
-import { cores } from '../theme/cores';
+import { useCores } from '../theme/useCores';
+import type { Cores } from '../theme/cores';
 
 interface IndicadoresProgressoProps {
   total?: number;
@@ -13,6 +14,9 @@ const IndicadoresProgresso: React.FC<IndicadoresProgressoProps> = ({
   atual, 
   style 
 }) => {
+  const { cores, fatorFonte } = useCores();
+  const estilos = useMemo(() => criarEstilos(cores, fatorFonte), [cores, fatorFonte]);
+
   return (
     <View style={[estilos.indicadores, style]}>
       {Array.from({ length: total }).map((_, index) => (
@@ -28,7 +32,7 @@ const IndicadoresProgresso: React.FC<IndicadoresProgressoProps> = ({
   );
 };
 
-const estilos = StyleSheet.create({
+const criarEstilos = (cores: Cores, fatorFonte: number = 1) => StyleSheet.create({
   indicadores: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -40,7 +44,7 @@ const estilos = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: '#D9D9D9',
+    backgroundColor: cores.inputBorda,
   },
   indicadorAtivo: {
     backgroundColor: cores.iconeTeal,

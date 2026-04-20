@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   StyleSheet,
@@ -13,7 +13,8 @@ import CabecalhoAutenticacao from '../components/CabecalhoAutenticacao';
 import EntradaPersonalizada from '../components/EntradaPersonalizada';
 import BotaoPrincipal from '../components/BotaoPrincipal';
 import { redefinirSenha } from '../services/api';
-import { cores } from '../theme/cores';
+import { useCores } from '../theme/useCores';
+import type { Cores } from '../theme/cores';
 
 type RootStackParamList = {
   Login: undefined;
@@ -31,6 +32,9 @@ const TelaNovaSenha: React.FC<TelaNovaSenhaProps> = ({ navigation, route }) => {
   const [confirmarSenha, setConfirmarSenha] = useState('');
   const [carregando, setCarregando] = useState(false);
   const [erros, setErros] = useState<{ novaSenha?: string; confirmarSenha?: string }>({});
+
+  const { cores, fatorFonte } = useCores();
+  const estilos = useMemo(() => criarEstilos(cores, fatorFonte), [cores, fatorFonte]);
 
   const validar = (): boolean => {
     const novosErros: { novaSenha?: string; confirmarSenha?: string } = {};
@@ -126,7 +130,7 @@ const TelaNovaSenha: React.FC<TelaNovaSenhaProps> = ({ navigation, route }) => {
   );
 };
 
-const estilos = StyleSheet.create({
+const criarEstilos = (cores: Cores, fatorFonte: number = 1) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: cores.fundo,

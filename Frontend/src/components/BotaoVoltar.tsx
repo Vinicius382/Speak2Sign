@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { TouchableOpacity, StyleSheet, TouchableOpacityProps, StyleProp, ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { cores } from '../theme/cores';
+import { useCores } from '../theme/useCores';
+import type { Cores } from '../theme/cores';
 
 interface BotaoVoltarProps extends TouchableOpacityProps {
   comFundo?: boolean;
@@ -11,6 +12,8 @@ interface BotaoVoltarProps extends TouchableOpacityProps {
 
 const BotaoVoltar: React.FC<BotaoVoltarProps> = ({ comFundo = false, style, onPress, ...props }) => {
   const navigation = useNavigation();
+  const { cores, fatorFonte } = useCores();
+  const estilos = useMemo(() => criarEstilos(cores, fatorFonte), [cores, fatorFonte]);
 
   return (
     <TouchableOpacity
@@ -27,7 +30,7 @@ const BotaoVoltar: React.FC<BotaoVoltarProps> = ({ comFundo = false, style, onPr
   );
 };
 
-const estilos = StyleSheet.create({
+const criarEstilos = (cores: Cores, fatorFonte: number = 1) => StyleSheet.create({
   botaoPadrao: {
     width: 40,
     height: 40,

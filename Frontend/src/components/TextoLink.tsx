@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Text, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
-import { cores } from '../theme/cores';
+import { useCores } from '../theme/useCores';
+import type { Cores } from '../theme/cores';
 
 interface TextoLinkProps {
   texto: string;
@@ -10,6 +11,9 @@ interface TextoLinkProps {
 }
 
 const TextoLink: React.FC<TextoLinkProps> = ({ texto, textoLink, aoClicar, estilo }) => {
+  const { cores, fatorFonte } = useCores();
+  const estilos = useMemo(() => criarEstilos(cores, fatorFonte), [cores, fatorFonte]);
+
   return (
     <TouchableOpacity onPress={aoClicar} style={[estilos.container, estilo]} activeOpacity={0.7}>
       <Text style={estilos.texto}>
@@ -19,13 +23,13 @@ const TextoLink: React.FC<TextoLinkProps> = ({ texto, textoLink, aoClicar, estil
   );
 };
 
-const estilos = StyleSheet.create({
+const criarEstilos = (cores: Cores, fatorFonte: number = 1) => StyleSheet.create({
   container: {
     alignItems: 'center',
     paddingVertical: 8,
   },
   texto: {
-    fontSize: 14,
+    fontSize: Math.round(14 * fatorFonte),
     color: cores.textoSecundario,
   },
   link: {

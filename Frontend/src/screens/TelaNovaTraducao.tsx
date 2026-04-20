@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -11,7 +11,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/NavegacaoPrincipal';
-import { cores } from '../theme/cores';
+import { useCores } from '../theme/useCores';
+import type { Cores } from '../theme/cores';
 import BarraInferior from '../components/BarraInferior';
 import BotaoVoltar from '../components/BotaoVoltar';
 import IndicadoresProgresso from '../components/IndicadoresProgresso';
@@ -20,6 +21,8 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 const TelaNovaTraducao: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
+  const { cores, fatorFonte } = useCores();
+  const estilos = useMemo(() => criarEstilos(cores, fatorFonte), [cores, fatorFonte]);
 
   return (
     <SafeAreaView style={estilos.container} edges={['top']}>
@@ -70,7 +73,7 @@ const TelaNovaTraducao: React.FC = () => {
   );
 };
 
-const estilos = StyleSheet.create({
+const criarEstilos = (cores: Cores, fatorFonte: number = 1) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: cores.fundo,
@@ -86,12 +89,12 @@ const estilos = StyleSheet.create({
     marginLeft: 12,
   },
   titulo: {
-    fontSize: 20,
+    fontSize: Math.round(20 * fatorFonte),
     fontWeight: '700',
     color: cores.textoPrincipal,
   },
   subtitulo: {
-    fontSize: 13,
+    fontSize: Math.round(13 * fatorFonte),
     color: cores.textoSecundario,
     marginTop: 2,
   },
@@ -125,10 +128,10 @@ const estilos = StyleSheet.create({
     marginBottom: 12,
   },
   iconeDigitar: {
-    backgroundColor: '#2C2C2C',
+    backgroundColor: cores.fundoIcone === '#F0F4F4' ? '#2C2C2C' : '#333333',
   },
   cardMetodoTexto: {
-    fontSize: 20,
+    fontSize: Math.round(20 * fatorFonte),
     fontWeight: '600',
     color: cores.textoPrincipal,
   },

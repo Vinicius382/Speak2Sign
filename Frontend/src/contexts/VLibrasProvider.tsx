@@ -4,7 +4,9 @@ import React, {
   useRef,
   useState,
   useCallback,
+  useEffect,
 } from 'react';
+import { useConfiguracoes } from './ConfiguracoesProvider';
 import { StyleSheet, View, LayoutRectangle } from 'react-native';
 import { WebView } from 'react-native-webview';
 
@@ -221,6 +223,7 @@ export const VLibrasProvider: React.FC<{ children: React.ReactNode }> = ({
   const [pronto, setPronto] = useState(false);
   const [visivel, setVisivel] = useState(false);
   const [layout, setLayout] = useState<LayoutRectangle | null>(null);
+  const { config } = useConfiguracoes();
 
   const traduzir = useCallback((texto: string) => {
     if (webViewRef.current) {
@@ -255,8 +258,39 @@ export const VLibrasProvider: React.FC<{ children: React.ReactNode }> = ({
       if (data.type === 'ready') {
         setPronto(true);
       }
+      if (data.type === 'log') {
+        console.log('[VLibras Webview]:', data.message);
+      }
     } catch (e) { }
   }, []);
+
+  useEffect(() => {
+    if (pronto && webViewRef.current) {
+      let speedValue = 1.0;
+      if (config.velocidadeAvatar === 'lenta') speedValue = 0.5;
+      else if (config.velocidadeAvatar === 'rapida') speedValue = 1.5;
+
+      const js = `
+        try {
+          if (window.plugin && window.plugin.player) {
+            // Algumas versões do VLibras expõem setAvatarSpeed, outras setSpeed no manager.
+            // Mandando a mensagem de velocidade para a Unity
+            if (typeof window.plugin.player.setAvatarSpeed === 'function') {
+              window.plugin.player.setAvatarSpeed(${speedValue});
+            } else if (typeof window.plugin.player.setSpeed === 'function') {
+              window.plugin.player.setSpeed(${speedValue});
+            } else if (window.plugin.player.videoPlayer) {
+              window.plugin.player.videoPlayer.playbackRate = ${speedValue};
+            }
+          }
+        } catch (e) {
+          window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'log', message: 'Erro setSpeed: ' + e.message }));
+        }
+        true;
+      `;
+      webViewRef.current.injectJavaScript(js);
+    }
+  }, [config.velocidadeAvatar, pronto]);
 
   // Calcula o estilo de posição da WebView baseado no layout informado
   const webviewPositionStyle = visivel && layout

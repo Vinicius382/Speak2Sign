@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, TextInput, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { cores } from '../theme/cores';
+import { useCores } from '../theme/useCores';
+import type { Cores } from '../theme/cores';
 
 interface CampoBuscaProps {
   valor: string;
@@ -14,6 +15,9 @@ const CampoBusca: React.FC<CampoBuscaProps> = ({
   aoMudar,
   placeholder = 'Buscar...',
 }) => {
+  const { cores, fatorFonte } = useCores();
+  const estilos = useMemo(() => criarEstilos(cores, fatorFonte), [cores, fatorFonte]);
+
   return (
     <View style={estilos.container}>
       <Ionicons name="search-outline" size={20} color={cores.textoSuave} style={estilos.icone} />
@@ -28,7 +32,7 @@ const CampoBusca: React.FC<CampoBuscaProps> = ({
   );
 };
 
-const estilos = StyleSheet.create({
+const criarEstilos = (cores: Cores, fatorFonte: number = 1) => StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -45,7 +49,7 @@ const estilos = StyleSheet.create({
   input: {
     flex: 1,
     paddingVertical: 14,
-    fontSize: 15,
+    fontSize: Math.round(15 * fatorFonte),
     color: cores.textoPrincipal,
   },
 });

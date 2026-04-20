@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -13,13 +13,14 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
 import { useRoute } from '@react-navigation/native';
 import type { RootStackParamList } from '../navigation/NavegacaoPrincipal';
-import { cores } from '../theme/cores';
+import { useCores } from '../theme/useCores';
+import type { Cores } from '../theme/cores';
 import BarraInferior from '../components/BarraInferior';
 import BotaoVoltar from '../components/BotaoVoltar';
 import IndicadoresProgresso from '../components/IndicadoresProgresso';
 import { useVLibras } from '../contexts/VLibrasProvider';
 import { useHistoricoFavoritos } from '../contexts/HistoricoFavoritosProvider';
-import { cores as coresTema } from '../theme/cores';
+
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type ResultadoRouteProp = RouteProp<RootStackParamList, 'ResultadoLibras'>;
@@ -32,6 +33,9 @@ const TelaResultadoLibras: React.FC = () => {
   const { alternarFavorito, ehFavorito } = useHistoricoFavoritos();
   const cardRef = useRef<View>(null);
   const traduziuRef = useRef(false);
+
+  const { cores, fatorFonte } = useCores();
+  const estilos = useMemo(() => criarEstilos(cores, fatorFonte), [cores, fatorFonte]);
 
   // useFocusEffect: dispara ao FOCAR e cleanup ao PERDER FOCO
   // (diferente de useEffect, que só dispara cleanup ao desmontar)
@@ -83,7 +87,7 @@ const TelaResultadoLibras: React.FC = () => {
           <Ionicons
             name={ehFavorito(texto) ? 'star' : 'star-outline'}
             size={24}
-            color={ehFavorito(texto) ? coresTema.favorito : coresTema.textoSuave}
+            color={ehFavorito(texto) ? cores.favorito : cores.textoSuave}
           />
         </TouchableOpacity>
       </View>
@@ -122,7 +126,7 @@ const TelaResultadoLibras: React.FC = () => {
   );
 };
 
-const estilos = StyleSheet.create({
+const criarEstilos = (cores: Cores, fatorFonte: number = 1) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: cores.fundo,
@@ -143,12 +147,12 @@ const estilos = StyleSheet.create({
     marginLeft: 'auto',
   },
   titulo: {
-    fontSize: 20,
+    fontSize: Math.round(20 * fatorFonte),
     fontWeight: '700',
     color: cores.textoPrincipal,
   },
   subtitulo: {
-    fontSize: 14,
+    fontSize: Math.round(14 * fatorFonte),
     color: cores.textoSecundario,
     marginTop: 2,
   },
@@ -159,14 +163,14 @@ const estilos = StyleSheet.create({
     marginBottom: 32,
     borderRadius: 16,
     overflow: 'hidden',
-    backgroundColor: '#FFF',
-    shadowColor: '#000',
+    backgroundColor: cores.inputFundo,
+    shadowColor: cores.sombra,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 4,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: cores.inputBorda,
   },
   acoesContainer: {
     marginTop: 'auto',
@@ -181,7 +185,7 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
   botaoNovaTraducaoTexto: {
-    fontSize: 16,
+    fontSize: Math.round(16 * fatorFonte),
     fontWeight: '700',
     color: '#FFFFFF',
   },

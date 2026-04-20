@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { cores } from '../theme/cores';
+import { useCores } from '../theme/useCores';
+import type { Cores } from '../theme/cores';
 import type { TipoTraducao } from '../contexts/HistoricoFavoritosProvider';
 
 interface CardItemProps {
@@ -17,14 +18,14 @@ interface CardItemProps {
   aoAlternarFavorito?: (texto: string, tipo: TipoTraducao) => void;
 }
 
-const obterCorTipo = (tipo: TipoTraducao): string => {
+const obterCorTipo = (tipo: TipoTraducao, coresObj: Cores): string => {
   switch (tipo) {
     case 'voz':
-      return cores.tipoVoz;
+      return coresObj.tipoVoz;
     case 'texto':
-      return cores.tipoTexto;
+      return coresObj.tipoTexto;
     case 'libras':
-      return cores.tipoLibras;
+      return coresObj.tipoLibras;
   }
 };
 
@@ -50,7 +51,9 @@ const CardItem: React.FC<CardItemProps> = ({
   aoPlay,
   aoAlternarFavorito,
 }) => {
-  const corTipo = obterCorTipo(tipo);
+  const { cores, fatorFonte } = useCores();
+  const estilos = useMemo(() => criarEstilos(cores, fatorFonte), [cores, fatorFonte]);
+  const corTipo = obterCorTipo(tipo, cores);
 
   return (
     <View style={estilos.card}>
@@ -113,7 +116,7 @@ const CardItem: React.FC<CardItemProps> = ({
   );
 };
 
-const estilos = StyleSheet.create({
+const criarEstilos = (cores: Cores, fatorFonte: number = 1) => StyleSheet.create({
   card: {
     backgroundColor: cores.superficie,
     borderRadius: 16,
@@ -139,7 +142,7 @@ const estilos = StyleSheet.create({
     marginRight: 6,
   },
   tagTexto: {
-    fontSize: 12,
+    fontSize: Math.round(12 * fatorFonte),
     fontWeight: '600',
   },
   botaoPrincipal: {
@@ -148,7 +151,7 @@ const estilos = StyleSheet.create({
     right: 12,
   },
   texto: {
-    fontSize: 16,
+    fontSize: Math.round(16 * fatorFonte),
     color: cores.textoPrincipal,
     fontWeight: '500',
     marginBottom: 12,
@@ -160,7 +163,7 @@ const estilos = StyleSheet.create({
     alignItems: 'center',
   },
   data: {
-    fontSize: 12,
+    fontSize: Math.round(12 * fatorFonte),
     color: cores.textoSuave,
   },
   acoes: {
@@ -182,10 +185,10 @@ const estilos = StyleSheet.create({
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#F5F5F5',
+    backgroundColor: cores.favoritoFundo,
   },
   botaoFavoritarAtivo: {
-    backgroundColor: '#FFFBEB',
+    backgroundColor: cores.favoritoAtivoFundo,
   },
 });
 
