@@ -12,7 +12,7 @@ import CabecalhoAutenticacao from '../components/CabecalhoAutenticacao';
 import EntradaPersonalizada from '../components/EntradaPersonalizada';
 import BotaoPrincipal from '../components/BotaoPrincipal';
 import TextoLink from '../components/TextoLink';
-import { cadastrarUsuario } from '../services/api';
+import { cadastrarUsuario, extrairMensagemErroApi } from '../services/api';
 import { useCores } from '../theme/useCores';
 import type { Cores } from '../theme/cores';
 
@@ -81,9 +81,11 @@ const TelaCadastro: React.FC<TelaCadastroProps> = ({ navigation }) => {
         { text: 'OK', onPress: () => navigation.navigate('Login') },
       ]);
     } catch (erro: any) {
-      const mensagem =
-        erro.response?.data || 'Erro ao conectar com o servidor. Tente novamente.';
-      Alert.alert('Erro', typeof mensagem === 'string' ? mensagem : 'Erro ao cadastrar.');
+      const mensagem = extrairMensagemErroApi(
+        erro,
+        'Erro ao conectar com o servidor. Tente novamente.'
+      );
+      Alert.alert('Erro', mensagem);
     } finally {
       setCarregando(false);
     }

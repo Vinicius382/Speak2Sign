@@ -12,7 +12,7 @@ import { RouteProp } from '@react-navigation/native';
 import CabecalhoAutenticacao from '../components/CabecalhoAutenticacao';
 import EntradaPersonalizada from '../components/EntradaPersonalizada';
 import BotaoPrincipal from '../components/BotaoPrincipal';
-import { redefinirSenha } from '../services/api';
+import { extrairMensagemErroApi, redefinirSenha } from '../services/api';
 import { useCores } from '../theme/useCores';
 import type { Cores } from '../theme/cores';
 
@@ -76,9 +76,11 @@ const TelaNovaSenha: React.FC<TelaNovaSenhaProps> = ({ navigation, route }) => {
         ]
       );
     } catch (erro: any) {
-      const mensagem =
-        erro.response?.data || 'Erro ao redefinir senha. Tente novamente.';
-      Alert.alert('Erro', typeof mensagem === 'string' ? mensagem : 'Erro ao redefinir senha.');
+      const mensagem = extrairMensagemErroApi(
+        erro,
+        'Erro ao redefinir senha. Tente novamente.'
+      );
+      Alert.alert('Erro', mensagem);
     } finally {
       setCarregando(false);
     }

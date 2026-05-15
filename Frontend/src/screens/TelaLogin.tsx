@@ -12,7 +12,7 @@ import CabecalhoAutenticacao from '../components/CabecalhoAutenticacao';
 import EntradaPersonalizada from '../components/EntradaPersonalizada';
 import BotaoPrincipal from '../components/BotaoPrincipal';
 import TextoLink from '../components/TextoLink';
-import { loginUsuario } from '../services/api';
+import { extrairMensagemErroApi, loginUsuario } from '../services/api';
 import { useCores } from '../theme/useCores';
 import type { Cores } from '../theme/cores';
 import { useAuth } from '../contexts/AuthProvider';
@@ -67,9 +67,11 @@ const TelaLogin: React.FC<TelaLoginProps> = ({ navigation }) => {
         routes: [{ name: 'Inicial' }],
       });
     } catch (erro: any) {
-      const mensagem =
-        erro.response?.data || 'Erro ao conectar com o servidor. Tente novamente.';
-      Alert.alert('Erro', typeof mensagem === 'string' ? mensagem : 'Email ou senha incorretos.');
+      const mensagem = extrairMensagemErroApi(
+        erro,
+        'Erro ao conectar com o servidor. Tente novamente.'
+      );
+      Alert.alert('Erro', mensagem);
     } finally {
       setCarregando(false);
     }

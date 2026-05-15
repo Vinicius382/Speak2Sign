@@ -7,6 +7,7 @@ import com.speak2sign.dto.HistoricoResponseDTO;
 import com.speak2sign.model.Favorito;
 import com.speak2sign.model.Historico;
 import com.speak2sign.service.TraducaoService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,90 +30,62 @@ public class TraducaoController {
     //HISTÓRICO 
 
     @GetMapping("/historico")
-    public ResponseEntity<?> listarHistorico(@PathVariable Long usuarioId) {
-        try {
-            List<Historico> historico = traducaoService.listarHistorico(usuarioId);
-            List<HistoricoResponseDTO> resposta = historico.stream()
-                    .map(HistoricoResponseDTO::fromEntity)
-                    .collect(Collectors.toList());
-            return ResponseEntity.ok(resposta);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<List<HistoricoResponseDTO>> listarHistorico(@PathVariable Long usuarioId) {
+        List<Historico> historico = traducaoService.listarHistorico(usuarioId);
+        List<HistoricoResponseDTO> resposta = historico.stream()
+                .map(HistoricoResponseDTO::fromEntity)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(resposta);
     }
 
     @PostMapping("/historico")
-    public ResponseEntity<?> adicionarAoHistorico(
+    public ResponseEntity<HistoricoResponseDTO> adicionarAoHistorico(
             @PathVariable Long usuarioId,
-            @RequestBody HistoricoRequestDTO dto) {
-        try {
-            Historico historico = traducaoService.adicionarAoHistorico(
-                    usuarioId, dto.getTipo(), dto.getTexto());
-            return ResponseEntity.ok(HistoricoResponseDTO.fromEntity(historico));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+            @Valid @RequestBody HistoricoRequestDTO dto) {
+        Historico historico = traducaoService.adicionarAoHistorico(
+                usuarioId, dto.getTipo(), dto.getTexto());
+        return ResponseEntity.ok(HistoricoResponseDTO.fromEntity(historico));
     }
 
     @DeleteMapping("/historico/{itemId}")
-    public ResponseEntity<?> removerDoHistorico(
+    public ResponseEntity<Map<String, String>> removerDoHistorico(
             @PathVariable Long usuarioId,
             @PathVariable Long itemId) {
-        try {
-            traducaoService.removerDoHistorico(usuarioId, itemId);
-            return ResponseEntity.ok(Map.of("mensagem", "Item removido do histórico."));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        traducaoService.removerDoHistorico(usuarioId, itemId);
+        return ResponseEntity.ok(Map.of("mensagem", "Item removido do histórico."));
     }
 
     @DeleteMapping("/historico")
-    public ResponseEntity<?> limparHistorico(@PathVariable Long usuarioId) {
-        try {
-            traducaoService.limparHistorico(usuarioId);
-            return ResponseEntity.ok(Map.of("mensagem", "Histórico limpo com sucesso."));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<Map<String, String>> limparHistorico(@PathVariable Long usuarioId) {
+        traducaoService.limparHistorico(usuarioId);
+        return ResponseEntity.ok(Map.of("mensagem", "Histórico limpo com sucesso."));
     }
 
     //FAVORITOS 
 
     @GetMapping("/favoritos")
-    public ResponseEntity<?> listarFavoritos(@PathVariable Long usuarioId) {
-        try {
-            List<Favorito> favoritos = traducaoService.listarFavoritos(usuarioId);
-            List<FavoritoResponseDTO> resposta = favoritos.stream()
-                    .map(FavoritoResponseDTO::fromEntity)
-                    .collect(Collectors.toList());
-            return ResponseEntity.ok(resposta);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<List<FavoritoResponseDTO>> listarFavoritos(@PathVariable Long usuarioId) {
+        List<Favorito> favoritos = traducaoService.listarFavoritos(usuarioId);
+        List<FavoritoResponseDTO> resposta = favoritos.stream()
+                .map(FavoritoResponseDTO::fromEntity)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(resposta);
     }
 
     @PostMapping("/favoritos")
-    public ResponseEntity<?> adicionarFavorito(
+    public ResponseEntity<FavoritoResponseDTO> adicionarFavorito(
             @PathVariable Long usuarioId,
-            @RequestBody FavoritoRequestDTO dto) {
-        try {
-            Favorito favorito = traducaoService.adicionarFavorito(
-                    usuarioId, dto.getTipo(), dto.getTexto());
-            return ResponseEntity.ok(FavoritoResponseDTO.fromEntity(favorito));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+            @Valid @RequestBody FavoritoRequestDTO dto) {
+        Favorito favorito = traducaoService.adicionarFavorito(
+                usuarioId, dto.getTipo(), dto.getTexto());
+        return ResponseEntity.ok(FavoritoResponseDTO.fromEntity(favorito));
     }
 
     @DeleteMapping("/favoritos/{itemId}")
-    public ResponseEntity<?> removerFavorito(
+    public ResponseEntity<Map<String, String>> removerFavorito(
             @PathVariable Long usuarioId,
             @PathVariable Long itemId) {
-        try {
-            traducaoService.removerFavorito(usuarioId, itemId);
-            return ResponseEntity.ok(Map.of("mensagem", "Favorito removido com sucesso."));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        traducaoService.removerFavorito(usuarioId, itemId);
+        return ResponseEntity.ok(Map.of("mensagem", "Favorito removido com sucesso."));
     }
 }

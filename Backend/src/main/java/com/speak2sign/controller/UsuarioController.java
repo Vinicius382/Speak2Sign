@@ -9,6 +9,7 @@ import com.speak2sign.dto.RedefinirSenhaRequestDTO;
 import com.speak2sign.dto.UsuarioResponseDTO;
 import com.speak2sign.model.Usuario;
 import com.speak2sign.service.UsuarioService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,67 +28,47 @@ public class UsuarioController {
     }
 
     @PostMapping("/cadastrar")
-    public ResponseEntity<?> cadastrar(@RequestBody CadastroRequestDTO dto) {
-        try {
-            Usuario usuario = new Usuario();
-            usuario.setNome(dto.getNome());
-            usuario.setEmail(dto.getEmail());
-            usuario.setSenha(dto.getSenha());
+    public ResponseEntity<UsuarioResponseDTO> cadastrar(@Valid @RequestBody CadastroRequestDTO dto) {
+        Usuario usuario = new Usuario();
+        usuario.setNome(dto.getNome());
+        usuario.setEmail(dto.getEmail());
+        usuario.setSenha(dto.getSenha());
 
-            Usuario novoUsuario = usuarioService.cadastrar(usuario);
-            return ResponseEntity.ok(UsuarioResponseDTO.fromEntity(novoUsuario));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        Usuario novoUsuario = usuarioService.cadastrar(usuario);
+        return ResponseEntity.ok(UsuarioResponseDTO.fromEntity(novoUsuario));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequestDTO dto) {
-        try {
-            Usuario usuarioLogado = usuarioService.login(dto.getEmail(), dto.getSenha());
-            return ResponseEntity.ok(UsuarioResponseDTO.fromEntity(usuarioLogado));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<UsuarioResponseDTO> login(@Valid @RequestBody LoginRequestDTO dto) {
+        Usuario usuarioLogado = usuarioService.login(dto.getEmail(), dto.getSenha());
+        return ResponseEntity.ok(UsuarioResponseDTO.fromEntity(usuarioLogado));
     }
 
     @PostMapping("/esqueci-senha")
-    public ResponseEntity<?> esqueciSenha(@RequestBody EsqueciSenhaRequestDTO dto) {
-        try {
-            usuarioService.solicitarRedefinicaoSenha(dto.getEmail());
-            return ResponseEntity.ok(Map.of("mensagem", "Código de recuperação enviado para o seu e-mail."));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<Map<String, String>> esqueciSenha(@Valid @RequestBody EsqueciSenhaRequestDTO dto) {
+        usuarioService.solicitarRedefinicaoSenha(dto.getEmail());
+        return ResponseEntity.ok(Map.of("mensagem", "Código de recuperação enviado para o seu e-mail."));
     }
 
     @PostMapping("/redefinir-senha")
-    public ResponseEntity<?> redefinirSenha(@RequestBody RedefinirSenhaRequestDTO dto) {
-        try {
-            usuarioService.redefinirSenha(dto.getEmail(), dto.getToken(), dto.getNovaSenha());
-            return ResponseEntity.ok(Map.of("mensagem", "Senha redefinida com sucesso!"));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<Map<String, String>> redefinirSenha(@Valid @RequestBody RedefinirSenhaRequestDTO dto) {
+        usuarioService.redefinirSenha(dto.getEmail(), dto.getToken(), dto.getNovaSenha());
+        return ResponseEntity.ok(Map.of("mensagem", "Senha redefinida com sucesso!"));
     }
 
     @PutMapping("/{id}/atualizar")
-    public ResponseEntity<?> atualizarPerfil(@PathVariable Long id, @RequestBody AtualizarPerfilDTO dto) {
-        try {
-            Usuario usuarioAtualizado = usuarioService.atualizarPerfil(id, dto.getNome());
-            return ResponseEntity.ok(UsuarioResponseDTO.fromEntity(usuarioAtualizado));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<UsuarioResponseDTO> atualizarPerfil(
+            @PathVariable Long id,
+            @Valid @RequestBody AtualizarPerfilDTO dto) {
+        Usuario usuarioAtualizado = usuarioService.atualizarPerfil(id, dto.getNome());
+        return ResponseEntity.ok(UsuarioResponseDTO.fromEntity(usuarioAtualizado));
     }
 
     @PutMapping("/{id}/alterar-senha")
-    public ResponseEntity<?> alterarSenha(@PathVariable Long id, @RequestBody AlterarSenhaDTO dto) {
-        try {
-            usuarioService.alterarSenha(id, dto.getSenhaAtual(), dto.getNovaSenha());
-            return ResponseEntity.ok(Map.of("mensagem", "Senha alterada com sucesso!"));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<Map<String, String>> alterarSenha(
+            @PathVariable Long id,
+            @Valid @RequestBody AlterarSenhaDTO dto) {
+        usuarioService.alterarSenha(id, dto.getSenhaAtual(), dto.getNovaSenha());
+        return ResponseEntity.ok(Map.of("mensagem", "Senha alterada com sucesso!"));
     }
 }

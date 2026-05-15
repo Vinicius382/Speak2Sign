@@ -50,6 +50,11 @@ interface MensagemResposta {
   mensagem: string;
 }
 
+interface ErroApiResposta {
+  mensagem?: string;
+  message?: string;
+}
+
 interface HistoricoPayload {
   tipo: string;
   texto: string;
@@ -145,6 +150,24 @@ export const atualizarPerfil = async (usuarioId: number, payload: AtualizarPerfi
 export const alterarSenhaApi = async (usuarioId: number, payload: AlterarSenhaPayload): Promise<MensagemResposta> => {
   const resposta = await api.put<MensagemResposta>(`/api/usuarios/${usuarioId}/alterar-senha`, payload);
   return resposta.data;
+};
+
+export const extrairMensagemErroApi = (erro: unknown, mensagemPadrao: string): string => {
+  const data = (erro as any)?.response?.data as ErroApiResposta | string | undefined;
+
+  if (typeof data === 'string') {
+    return data;
+  }
+
+  if (data?.mensagem) {
+    return data.mensagem;
+  }
+
+  if (data?.message) {
+    return data.message;
+  }
+
+  return mensagemPadrao;
 };
 
 export default api;

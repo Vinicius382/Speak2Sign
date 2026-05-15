@@ -14,7 +14,7 @@ import { RouteProp } from '@react-navigation/native';
 import CabecalhoAutenticacao from '../components/CabecalhoAutenticacao';
 import BotaoPrincipal from '../components/BotaoPrincipal';
 import TextoLink from '../components/TextoLink';
-import { solicitarRedefinicaoSenha } from '../services/api';
+import { extrairMensagemErroApi, solicitarRedefinicaoSenha } from '../services/api';
 import { useCores } from '../theme/useCores';
 import type { Cores } from '../theme/cores';
 
@@ -109,9 +109,11 @@ const TelaCodigoVerificacao: React.FC<TelaCodigoVerificacaoProps> = ({ navigatio
       inputsRef.current[0]?.focus();
       Alert.alert('Sucesso', 'Um novo código foi enviado para seu e-mail.');
     } catch (erro: any) {
-      const mensagem =
-        erro.response?.data || 'Erro ao reenviar código. Tente novamente.';
-      Alert.alert('Erro', typeof mensagem === 'string' ? mensagem : 'Erro ao reenviar.');
+      const mensagem = extrairMensagemErroApi(
+        erro,
+        'Erro ao reenviar código. Tente novamente.'
+      );
+      Alert.alert('Erro', mensagem);
     } finally {
       setReenviando(false);
     }

@@ -12,7 +12,7 @@ import CabecalhoAutenticacao from '../components/CabecalhoAutenticacao';
 import EntradaPersonalizada from '../components/EntradaPersonalizada';
 import BotaoPrincipal from '../components/BotaoPrincipal';
 import TextoLink from '../components/TextoLink';
-import { solicitarRedefinicaoSenha } from '../services/api';
+import { extrairMensagemErroApi, solicitarRedefinicaoSenha } from '../services/api';
 import { useCores } from '../theme/useCores';
 import type { Cores } from '../theme/cores';
 
@@ -55,9 +55,11 @@ const TelaEsqueciSenha: React.FC<TelaEsqueciSenhaProps> = ({ navigation }) => {
       await solicitarRedefinicaoSenha({ email: email.trim() });
       navigation.navigate('CodigoVerificacao', { email: email.trim() });
     } catch (erro: any) {
-      const mensagem =
-        erro.response?.data || 'Erro ao conectar com o servidor. Tente novamente.';
-      Alert.alert('Erro', typeof mensagem === 'string' ? mensagem : 'Erro ao enviar código.');
+      const mensagem = extrairMensagemErroApi(
+        erro,
+        'Erro ao conectar com o servidor. Tente novamente.'
+      );
+      Alert.alert('Erro', mensagem);
     } finally {
       setCarregando(false);
     }

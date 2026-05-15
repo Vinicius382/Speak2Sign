@@ -16,7 +16,7 @@ import type { RootStackParamList } from '../navigation/NavegacaoPrincipal';
 import { useCores } from '../theme/useCores';
 import type { Cores } from '../theme/cores';
 import { useAuth } from '../contexts/AuthProvider';
-import { alterarSenhaApi } from '../services/api';
+import { alterarSenhaApi, extrairMensagemErroApi } from '../services/api';
 import BotaoVoltar from '../components/BotaoVoltar';
 import EntradaPersonalizada from '../components/EntradaPersonalizada';
 import BotaoPrincipal from '../components/BotaoPrincipal';
@@ -76,9 +76,11 @@ const TelaAlterarSenha: React.FC = () => {
         { text: 'OK', onPress: () => navigation.goBack() },
       ]);
     } catch (error: any) {
-      const mensagem =
-        error.response?.data || 'Erro ao alterar senha. Tente novamente.';
-      Alert.alert('Erro', typeof mensagem === 'string' ? mensagem : 'Erro ao alterar senha.');
+      const mensagem = extrairMensagemErroApi(
+        error,
+        'Erro ao alterar senha. Tente novamente.'
+      );
+      Alert.alert('Erro', mensagem);
     } finally {
       setCarregando(false);
     }
