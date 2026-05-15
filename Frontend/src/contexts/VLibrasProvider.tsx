@@ -10,7 +10,6 @@ import { useConfiguracoes } from './ConfiguracoesProvider';
 import { StyleSheet, View, LayoutRectangle } from 'react-native';
 import { WebView } from 'react-native-webview';
 
-// ─── Tipos ───────────────────────────────────────────────
 interface VLibrasContextType {
   pronto: boolean;
   visivel: boolean;
@@ -20,7 +19,6 @@ interface VLibrasContextType {
   definirLayout: (layout: LayoutRectangle) => void;
 }
 
-// ─── Context ─────────────────────────────────────────────
 const VLibrasContext = createContext<VLibrasContextType>({
   pronto: false,
   visivel: false,
@@ -343,7 +341,6 @@ export const VLibrasProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 };
 
-// ─── Estilos ─────────────────────────────────────────────
 const estilos = StyleSheet.create({
   webview: {
     flex: 1,

@@ -80,25 +80,25 @@ const TelaInicial: React.FC = () => {
         {/* Grade 2x2 */}
         <View style={estilos.grade}>
           <TouchableOpacity style={estilos.cardGrade} onPress={navegarParaFavoritos} activeOpacity={0.7}>
-            <Ionicons name="star-outline" size={26} color={cores.textoSuave} />
+            <Ionicons name="star-outline" size={26} color={cores.textoPrincipal} />
             <Text style={estilos.cardGradeTitulo}>Favoritos</Text>
             <Text style={estilos.cardGradeDescricao}>Acesse suas mensagens favoritas</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={estilos.cardGrade} onPress={navegarParaHistorico} activeOpacity={0.7}>
-            <Ionicons name="time-outline" size={26} color={cores.textoSuave} />
+            <Ionicons name="time-outline" size={26} color={cores.textoPrincipal} />
             <Text style={estilos.cardGradeTitulo}>Histórico</Text>
             <Text style={estilos.cardGradeDescricao}>Reveja suas conversas e mensagens anteriores</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={estilos.cardGrade} onPress={avisoEmBreve} activeOpacity={0.7}>
-            <Ionicons name="book-outline" size={26} color={cores.textoSuave} />
+            <Ionicons name="book-outline" size={26} color={cores.textoPrincipal} />
             <Text style={estilos.cardGradeTitulo}>Mini-Curso{'\n'}de Libras</Text>
             <Text style={estilos.cardGradeDescricao}>Aprenda o básico de Libras</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={estilos.cardGrade} onPress={() => navigation.navigate('MinhaConta')} activeOpacity={0.7}>
-            <Ionicons name="person-outline" size={26} color={cores.textoSuave} />
+            <Ionicons name="person-outline" size={26} color={cores.textoPrincipal} />
             <Text style={estilos.cardGradeTitulo}>Minha Conta</Text>
             <Text style={estilos.cardGradeDescricao}>Gerencie suas configurações pessoais</Text>
           </TouchableOpacity>
