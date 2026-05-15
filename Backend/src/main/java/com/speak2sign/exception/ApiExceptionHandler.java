@@ -7,6 +7,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
@@ -33,6 +34,12 @@ public class ApiExceptionHandler {
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErroResponseDTO> handleBusinessException(RuntimeException exception) {
         return buildResponse(HttpStatus.BAD_REQUEST, exception.getMessage(), Map.of());
+    }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ErroResponseDTO> handleResponseStatusException(ResponseStatusException exception) {
+        String mensagem = exception.getReason() != null ? exception.getReason() : "Erro ao processar requisição.";
+        return buildResponse(HttpStatus.valueOf(exception.getStatusCode().value()), mensagem, Map.of());
     }
 
     private ResponseEntity<ErroResponseDTO> buildResponse(

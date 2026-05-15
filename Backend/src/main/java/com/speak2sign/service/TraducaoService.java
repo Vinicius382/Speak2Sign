@@ -7,9 +7,12 @@ import com.speak2sign.repository.FavoritoRepository;
 import com.speak2sign.repository.HistoricoRepository;
 import com.speak2sign.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -52,10 +55,22 @@ public class TraducaoService {
     }
 
     public void removerDoHistorico(Long usuarioId, Long itemId) {
-        historicoRepository.deleteByIdAndUsuarioId(itemId, usuarioId);
+        Historico historico = historicoRepository.findById(itemId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Item do histórico não encontrado."));
+
+        if (!Objects.equals(historico.getUsuario().getId(), usuarioId)) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Item do histórico não pertence ao usuário informado.");
+        }
+
+        historicoRepository.delete(historico);
     }
 
     public void limparHistorico(Long usuarioId) {
+        buscarUsuario(usuarioId);
         historicoRepository.deleteByUsuarioId(usuarioId);
     }
 
@@ -82,6 +97,17 @@ public class TraducaoService {
     }
 
     public void removerFavorito(Long usuarioId, Long itemId) {
-        favoritoRepository.deleteByIdAndUsuarioId(itemId, usuarioId);
+        Favorito favorito = favoritoRepository.findById(itemId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Favorito não encontrado."));
+
+        if (!Objects.equals(favorito.getUsuario().getId(), usuarioId)) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Favorito não pertence ao usuário informado.");
+        }
+
+        favoritoRepository.delete(favorito);
     }
 }

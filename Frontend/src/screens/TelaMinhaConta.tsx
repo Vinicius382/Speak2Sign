@@ -18,9 +18,9 @@ import { useCores } from '../theme/useCores';
 import type { Cores } from '../theme/cores';
 import { useAuth } from '../contexts/AuthProvider';
 import { useConfiguracoes } from '../contexts/ConfiguracoesProvider';
+import { useHistoricoFavoritos } from '../contexts/HistoricoFavoritosProvider';
 import type { TamanhoFonte, VelocidadeAvatar } from '../contexts/ConfiguracoesProvider';
 import BotaoVoltar from '../components/BotaoVoltar';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -36,6 +36,7 @@ const TelaMinhaConta: React.FC = () => {
     setVelocidadeAvatar,
     setSincronizacaoAtivada,
   } = useConfiguracoes();
+  const { limparDadosLocais } = useHistoricoFavoritos();
 
   const iniciais = usuario?.nome
     ? usuario.nome
@@ -145,10 +146,7 @@ const TelaMinhaConta: React.FC = () => {
           style: 'destructive',
           onPress: async () => {
             try {
-              await AsyncStorage.multiRemove([
-                '@speak2sign_historico',
-                '@speak2sign_favoritos',
-              ]);
+              await limparDadosLocais();
               Alert.alert('Pronto!', 'Dados locais foram limpos com sucesso.');
             } catch (e) {
               Alert.alert('Erro', 'Não foi possível limpar os dados.');

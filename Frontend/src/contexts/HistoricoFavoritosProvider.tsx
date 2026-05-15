@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from './AuthProvider';
+import { useConfiguracoes } from './ConfiguracoesProvider';
 import {
   listarHistorico,
   adicionarHistoricoApi,
@@ -37,6 +38,7 @@ interface HistoricoFavoritosContexto {
   adicionarAoHistorico: (texto: string, tipo: TipoTraducao) => void;
   removerDoHistorico: (id: string) => void;
   limparHistorico: () => void;
+  limparDadosLocais: () => Promise<void>;
   adicionarFavorito: (texto: string, tipo: TipoTraducao) => void;
   removerFavorito: (id: string) => void;
   alternarFavorito: (texto: string, tipo: TipoTraducao) => void;
@@ -82,11 +84,18 @@ const formatarDataISO = (dataISO: string): string => {
   }
 };
 
+const chaveHistorico = (item: Pick<ItemHistorico, 'tipo' | 'texto' | 'data'>): string =>
+  `${item.tipo}:${item.texto}:${item.data}`;
+
+const chaveFavorito = (item: Pick<ItemFavorito, 'tipo' | 'texto'>): string =>
+  `${item.tipo}:${item.texto}`;
+
 // Provider
 export const HistoricoFavoritosProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [historico, setHistorico] = useState<ItemHistorico[]>([]);
   const [favoritos, setFavoritos] = useState<ItemFavorito[]>([]);
   const { usuario } = useAuth();
+  const { config } = useConfiguracoes();
   const sincronizouRef = useRef(false);
 
   // Carregar dados locais ao iniciar
@@ -94,16 +103,20 @@ export const HistoricoFavoritosProvider: React.FC<{ children: React.ReactNode }>
     carregarDadosLocais();
   }, []);
 
-  // Sincronizar com backend quando o usuário está logado
+  // Sincronizar com backend quando o usuário está logado e a sincronização está ativa
   useEffect(() => {
-    if (usuario && !sincronizouRef.current) {
+    if (usuario && config.sincronizacaoAtivada && !sincronizouRef.current) {
       sincronizouRef.current = true;
       sincronizarComBackend();
     }
-    if (!usuario) {
+    if (!usuario || !config.sincronizacaoAtivada) {
       sincronizouRef.current = false;
     }
-  }, [usuario]);
+  }, [usuario, config.sincronizacaoAtivada]);
+
+  const podeSincronizar = useCallback(() => {
+    return Boolean(usuario && config.sincronizacaoAtivada);
+  }, [usuario, config.sincronizacaoAtivada]);
 
   const carregarDadosLocais = async () => {
     try {
@@ -119,7 +132,7 @@ export const HistoricoFavoritosProvider: React.FC<{ children: React.ReactNode }>
   };
 
   const sincronizarComBackend = async () => {
-    if (!usuario) return;
+    if (!usuario || !config.sincronizacaoAtivada) return;
 
     try {
       // Buscar dados do backend
@@ -145,31 +158,57 @@ export const HistoricoFavoritosProvider: React.FC<{ children: React.ReactNode }>
         data: formatarDataISO(item.dataCriacao),
       }));
 
-      // Mesclar: manter itens locais que não estão no backend + itens do backend
+      // Mesclar histórico sem eliminar repetições legítimas do mesmo texto.
       setHistorico((prev) => {
-        const textosRemotos = new Set(historicoConvertido.map((h) => h.texto));
-        const locaisNovos = prev.filter((item) => !item.idRemoto && !textosRemotos.has(item.texto));
+        const idsRemotos = new Set(historicoConvertido.map((h) => h.idRemoto));
+        const chavesRemotas = new Set(historicoConvertido.map((h) => chaveHistorico(h)));
+        const locaisPendentes = prev.filter(
+          (item) => !item.idRemoto && !chavesRemotas.has(chaveHistorico(item))
+        );
+        const locaisSincronizadosAusentes = prev.filter(
+          (item) => item.idRemoto && !idsRemotos.has(item.idRemoto)
+        );
 
-        // Enviar itens locais novos ao backend (em background)
-        locaisNovos.forEach((item) => {
-          adicionarHistoricoApi(usuario.id, { tipo: item.tipo, texto: item.texto }).catch(console.error);
+        locaisPendentes.forEach((item) => {
+          adicionarHistoricoApi(usuario.id, { tipo: item.tipo, texto: item.texto })
+            .then((resposta) => {
+              atualizarHistoricoLocal((atuais) =>
+                atuais.map((atual) =>
+                  atual.id === item.id ? { ...atual, idRemoto: resposta.id } : atual
+                )
+              );
+            })
+            .catch(console.error);
         });
 
-        const mesclado = [...locaisNovos, ...historicoConvertido];
+        const mesclado = [...locaisPendentes, ...locaisSincronizadosAusentes, ...historicoConvertido];
         AsyncStorage.setItem(CHAVE_HISTORICO, JSON.stringify(mesclado)).catch(console.error);
         return mesclado;
       });
 
       setFavoritos((prev) => {
-        const textosRemotos = new Set(favoritosConvertidos.map((f) => f.texto));
-        const locaisNovos = prev.filter((item) => !item.idRemoto && !textosRemotos.has(item.texto));
+        const idsRemotos = new Set(favoritosConvertidos.map((f) => f.idRemoto));
+        const chavesRemotas = new Set(favoritosConvertidos.map((f) => chaveFavorito(f)));
+        const locaisPendentes = prev.filter(
+          (item) => !item.idRemoto && !chavesRemotas.has(chaveFavorito(item))
+        );
+        const locaisSincronizadosAusentes = prev.filter(
+          (item) => item.idRemoto && !idsRemotos.has(item.idRemoto)
+        );
 
-        // Enviar itens locais novos ao backend (em background)
-        locaisNovos.forEach((item) => {
-          adicionarFavoritoApi(usuario.id, { tipo: item.tipo, texto: item.texto }).catch(console.error);
+        locaisPendentes.forEach((item) => {
+          adicionarFavoritoApi(usuario.id, { tipo: item.tipo, texto: item.texto })
+            .then((resposta) => {
+              atualizarFavoritosLocal((atuais) =>
+                atuais.map((atual) =>
+                  atual.id === item.id ? { ...atual, idRemoto: resposta.id } : atual
+                )
+              );
+            })
+            .catch(console.error);
         });
 
-        const mesclado = [...locaisNovos, ...favoritosConvertidos];
+        const mesclado = [...locaisPendentes, ...locaisSincronizadosAusentes, ...favoritosConvertidos];
         AsyncStorage.setItem(CHAVE_FAVORITOS, JSON.stringify(mesclado)).catch(console.error);
         return mesclado;
       });
@@ -178,6 +217,22 @@ export const HistoricoFavoritosProvider: React.FC<{ children: React.ReactNode }>
       // Falha silenciosa — mantém dados locais
     }
   };
+
+  const atualizarHistoricoLocal = useCallback((atualizador: (prev: ItemHistorico[]) => ItemHistorico[]) => {
+    setHistorico((prev) => {
+      const atualizado = atualizador(prev);
+      AsyncStorage.setItem(CHAVE_HISTORICO, JSON.stringify(atualizado)).catch(console.error);
+      return atualizado;
+    });
+  }, []);
+
+  const atualizarFavoritosLocal = useCallback((atualizador: (prev: ItemFavorito[]) => ItemFavorito[]) => {
+    setFavoritos((prev) => {
+      const atualizado = atualizador(prev);
+      AsyncStorage.setItem(CHAVE_FAVORITOS, JSON.stringify(atualizado)).catch(console.error);
+      return atualizado;
+    });
+  }, []);
 
   // === HISTÓRICO ===
 
@@ -189,42 +244,49 @@ export const HistoricoFavoritosProvider: React.FC<{ children: React.ReactNode }>
       data: formatarData(),
     };
 
-    setHistorico((prev) => {
-      const atualizado = [novoItem, ...prev];
-      AsyncStorage.setItem(CHAVE_HISTORICO, JSON.stringify(atualizado)).catch(console.error);
-      return atualizado;
-    });
+    atualizarHistoricoLocal((prev) => [novoItem, ...prev]);
 
-    // Enviar ao backend em background
-    if (usuario) {
-      adicionarHistoricoApi(usuario.id, { tipo, texto }).catch(console.error);
+    if (usuario && podeSincronizar()) {
+      adicionarHistoricoApi(usuario.id, { tipo, texto })
+        .then((resposta) => {
+          atualizarHistoricoLocal((prev) =>
+            prev.map((item) =>
+              item.id === novoItem.id ? { ...item, idRemoto: resposta.id } : item
+            )
+          );
+        })
+        .catch(console.error);
     }
-  }, [usuario]);
+  }, [atualizarHistoricoLocal, podeSincronizar, usuario]);
 
   const removerDoHistorico = useCallback((id: string) => {
-    setHistorico((prev) => {
-      const item = prev.find((h) => h.id === id);
-      const atualizado = prev.filter((h) => h.id !== id);
-      AsyncStorage.setItem(CHAVE_HISTORICO, JSON.stringify(atualizado)).catch(console.error);
+    const item = historico.find((h) => h.id === id);
+    if (!item) return;
 
-      // Remover do backend se tiver ID remoto
-      if (usuario && item?.idRemoto) {
-        removerHistoricoApi(usuario.id, item.idRemoto).catch(console.error);
-      }
+    if (!usuario || !podeSincronizar() || !item.idRemoto) {
+      atualizarHistoricoLocal((prev) => prev.filter((h) => h.id !== id));
+      return;
+    }
 
-      return atualizado;
-    });
-  }, [usuario]);
+    removerHistoricoApi(usuario.id, item.idRemoto)
+      .then(() => {
+        atualizarHistoricoLocal((prev) => prev.filter((h) => h.id !== id));
+      })
+      .catch(console.error);
+  }, [atualizarHistoricoLocal, historico, podeSincronizar, usuario]);
 
   const limparTodoHistorico = useCallback(() => {
-    setHistorico([]);
-    AsyncStorage.setItem(CHAVE_HISTORICO, JSON.stringify([])).catch(console.error);
-
-    // Limpar no backend
-    if (usuario) {
-      limparHistoricoApi(usuario.id).catch(console.error);
+    if (!usuario || !podeSincronizar()) {
+      atualizarHistoricoLocal(() => []);
+      return;
     }
-  }, [usuario]);
+
+    limparHistoricoApi(usuario.id)
+      .then(() => {
+        atualizarHistoricoLocal(() => []);
+      })
+      .catch(console.error);
+  }, [atualizarHistoricoLocal, podeSincronizar, usuario]);
 
   // === FAVORITOS ===
 
@@ -236,32 +298,45 @@ export const HistoricoFavoritosProvider: React.FC<{ children: React.ReactNode }>
       data: formatarData(),
     };
 
-    setFavoritos((prev) => {
-      const atualizado = [novoFavorito, ...prev];
-      AsyncStorage.setItem(CHAVE_FAVORITOS, JSON.stringify(atualizado)).catch(console.error);
-      return atualizado;
+    atualizarFavoritosLocal((prev) => {
+      const semDuplicado = prev.filter((item) => chaveFavorito(item) !== chaveFavorito(novoFavorito));
+      return [novoFavorito, ...semDuplicado];
     });
 
-    // Enviar ao backend em background
-    if (usuario) {
-      adicionarFavoritoApi(usuario.id, { tipo, texto }).catch(console.error);
+    if (usuario && podeSincronizar()) {
+      adicionarFavoritoApi(usuario.id, { tipo, texto })
+        .then((resposta) => {
+          atualizarFavoritosLocal((prev) =>
+            prev.map((item) =>
+              item.id === novoFavorito.id ? { ...item, idRemoto: resposta.id } : item
+            )
+          );
+        })
+        .catch(console.error);
     }
-  }, [usuario]);
+  }, [atualizarFavoritosLocal, podeSincronizar, usuario]);
 
   const removerFavorito = useCallback((id: string) => {
-    setFavoritos((prev) => {
-      const item = prev.find((f) => f.id === id);
-      const atualizado = prev.filter((f) => f.id !== id);
-      AsyncStorage.setItem(CHAVE_FAVORITOS, JSON.stringify(atualizado)).catch(console.error);
+    const item = favoritos.find((f) => f.id === id);
+    if (!item) return;
 
-      // Remover do backend se tiver ID remoto
-      if (usuario && item?.idRemoto) {
-        removerFavoritoApi(usuario.id, item.idRemoto).catch(console.error);
-      }
+    if (!usuario || !podeSincronizar() || !item.idRemoto) {
+      atualizarFavoritosLocal((prev) => prev.filter((f) => f.id !== id));
+      return;
+    }
 
-      return atualizado;
-    });
-  }, [usuario]);
+    removerFavoritoApi(usuario.id, item.idRemoto)
+      .then(() => {
+        atualizarFavoritosLocal((prev) => prev.filter((f) => f.id !== id));
+      })
+      .catch(console.error);
+  }, [atualizarFavoritosLocal, favoritos, podeSincronizar, usuario]);
+
+  const limparDadosLocais = useCallback(async () => {
+    await AsyncStorage.multiRemove([CHAVE_HISTORICO, CHAVE_FAVORITOS]);
+    setHistorico([]);
+    setFavoritos([]);
+  }, []);
 
   const ehFavorito = useCallback((texto: string): boolean => {
     return favoritos.some((f) => f.texto === texto);
@@ -284,6 +359,7 @@ export const HistoricoFavoritosProvider: React.FC<{ children: React.ReactNode }>
         adicionarAoHistorico,
         removerDoHistorico,
         limparHistorico: limparTodoHistorico,
+        limparDadosLocais,
         adicionarFavorito,
         removerFavorito,
         alternarFavorito,
