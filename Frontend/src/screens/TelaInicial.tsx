@@ -5,7 +5,6 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Alert,
   StatusBar,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -23,10 +22,6 @@ const TelaInicial: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
   const { cores, estaEscuro, fatorFonte } = useCores();
   const estilos = useMemo(() => criarEstilos(cores, fatorFonte), [cores, fatorFonte]);
-
-  const avisoEmBreve = () => {
-    Alert.alert('Em breve', 'Funcionalidade em desenvolvimento.');
-  };
 
   const navegarParaFavoritos = () => navigation.navigate('Favoritos');
   const navegarParaHistorico = () => navigation.navigate('Historico');
@@ -91,10 +86,10 @@ const TelaInicial: React.FC = () => {
             <Text style={estilos.cardGradeDescricao}>Reveja suas conversas e mensagens anteriores</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={estilos.cardGrade} onPress={avisoEmBreve} activeOpacity={0.7}>
+          <TouchableOpacity style={estilos.cardGrade} onPress={() => navigation.navigate('Dicionario')} activeOpacity={0.7}>
             <Ionicons name="book-outline" size={26} color={cores.textoPrincipal} />
-            <Text style={estilos.cardGradeTitulo}>Mini-Curso{'\n'}de Libras</Text>
-            <Text style={estilos.cardGradeDescricao}>Aprenda o básico de Libras</Text>
+            <Text style={estilos.cardGradeTitulo}>Dicionário</Text>
+            <Text style={estilos.cardGradeDescricao}>Explore palavras e sinais por categoria</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={estilos.cardGrade} onPress={() => navigation.navigate('MinhaConta')} activeOpacity={0.7}>

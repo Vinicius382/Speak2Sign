@@ -26,6 +26,7 @@ expo-env.d.ts
 npm-debug.*
 yarn-debug.*
 yarn-error.*
+debug-screen.png
 
 # macOS
 .DS_Store
@@ -36,6 +37,9 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
+
+# local Gradle cache
+.gradle-user-home/
 
 # generated native folders
 /ios

@@ -15,6 +15,7 @@ import TelaFavoritos from '../screens/TelaFavoritos';
 import TelaMinhaConta from '../screens/TelaMinhaConta';
 import TelaEditarPerfil from '../screens/TelaEditarPerfil';
 import TelaAlterarSenha from '../screens/TelaAlterarSenha';
+import TelaDicionario from '../screens/TelaDicionario';
 
 export type RootStackParamList = {
   Login: undefined;
@@ -29,6 +30,7 @@ export type RootStackParamList = {
   ResultadoLibras: { texto: string };
   Historico: undefined;
   Favoritos: undefined;
+  Dicionario: undefined;
   MinhaConta: undefined;
   EditarPerfil: undefined;
   AlterarSenha: undefined;
@@ -61,6 +63,7 @@ const NavegacaoPrincipal: React.FC = () => {
       <Stack.Screen name="ResultadoLibras" component={TelaResultadoLibras} />
       <Stack.Screen name="Historico" component={TelaHistorico} />
       <Stack.Screen name="Favoritos" component={TelaFavoritos} />
+      <Stack.Screen name="Dicionario" component={TelaDicionario} />
       <Stack.Screen name="MinhaConta" component={TelaMinhaConta} />
       <Stack.Screen name="EditarPerfil" component={TelaEditarPerfil} />
       <Stack.Screen name="AlterarSenha" component={TelaAlterarSenha} />
@@ -69,4 +72,3 @@ const NavegacaoPrincipal: React.FC = () => {
 };
 
 export default NavegacaoPrincipal;
-
