@@ -53,7 +53,7 @@ const BarraInferior: React.FC<BarraInferiorProps> = ({ telaAtiva = 'Início' }) 
             <Ionicons
               name={item.icone}
               size={24}
-              color={ativo ? cores.iconeTeal : cores.textoSuave}
+              color={ativo ? cores.iconeTeal : cores.textoPrincipal}
             />
             <Text
               style={[
@@ -96,7 +96,7 @@ const criarEstilos = (cores: Cores, fatorFonte: number = 1) => StyleSheet.create
   },
   textoBarra: {
     fontSize: Math.round(11 * fatorFonte),
-    color: cores.textoSuave,
+    color: cores.textoPrincipal,
     marginTop: 4,
     fontWeight: '500',
   },

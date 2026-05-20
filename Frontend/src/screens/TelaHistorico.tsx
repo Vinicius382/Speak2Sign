@@ -1,12 +1,13 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
+  FlatList,
   TouchableOpacity,
   StatusBar,
   Alert,
+  ListRenderItem,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -20,7 +21,7 @@ import BotaoVoltar from '../components/BotaoVoltar';
 import CampoBusca from '../components/CampoBusca';
 import CardsEstatisticas, { FiltroTipo } from '../components/CardsEstatisticas';
 import CardItem from '../components/CardItem';
-import { useHistoricoFavoritos } from '../contexts/HistoricoFavoritosProvider';
+import { useHistoricoFavoritos, type ItemHistorico } from '../contexts/HistoricoFavoritosProvider';
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 const TelaHistorico: React.FC = () => {
@@ -29,26 +30,20 @@ const TelaHistorico: React.FC = () => {
   const estilos = useMemo(() => criarEstilos(cores, fatorFonte), [cores, fatorFonte]);
   const {
     historico,
+    estatisticasHistorico,
+    textosFavoritos,
     removerDoHistorico,
     limparHistorico,
     alternarFavorito,
-    ehFavorito,
   } = useHistoricoFavoritos();
 
   const [busca, setBusca] = useState('');
   const [filtro, setFiltro] = useState<FiltroTipo>('todos');
 
-  // Estatísticas
-  const estatisticas = useMemo(() => ({
-    total: historico.length,
-    voz: historico.filter((h) => h.tipo === 'voz').length,
-    texto: historico.filter((h) => h.tipo === 'texto').length,
-    libras: historico.filter((h) => h.tipo === 'libras').length,
-  }), [historico]);
-
   // Itens filtrados
   const itensFiltrados = useMemo(() => {
     let itens = historico;
+    const termoBusca = busca.trim().toLowerCase();
 
     // Filtro por tipo
     if (filtro !== 'todos') {
@@ -56,9 +51,9 @@ const TelaHistorico: React.FC = () => {
     }
 
     // Filtro por busca
-    if (busca.trim()) {
+    if (termoBusca) {
       itens = itens.filter((item) =>
-        item.texto.toLowerCase().includes(busca.toLowerCase())
+        item.texto.toLowerCase().includes(termoBusca)
       );
     }
 
@@ -76,9 +71,52 @@ const TelaHistorico: React.FC = () => {
     );
   };
 
-  const navegarParaResultado = (texto: string) => {
+  const navegarParaResultado = useCallback((texto: string) => {
     navigation.navigate('ResultadoLibras', { texto });
-  };
+  }, [navigation]);
+
+  const obterChaveItem = useCallback((item: ItemHistorico) => item.id, []);
+
+  const renderizarCabecalhoLista = useMemo(() => (
+    <>
+      <CampoBusca
+        valor={busca}
+        aoMudar={setBusca}
+        placeholder="Busque no Histórico"
+      />
+
+      <CardsEstatisticas
+        estatisticas={estatisticasHistorico}
+        filtroAtivo={filtro}
+        aoSelecionarFiltro={setFiltro}
+      />
+    </>
+  ), [busca, estatisticasHistorico, filtro]);
+
+  const renderizarItem: ListRenderItem<ItemHistorico> = useCallback(({ item }) => (
+    <CardItem
+      id={item.id}
+      tipo={item.tipo}
+      texto={item.texto}
+      data={item.data}
+      modo="historico"
+      ehFavorito={textosFavoritos.has(item.texto)}
+      aoRemover={removerDoHistorico}
+      aoPlay={navegarParaResultado}
+      aoAlternarFavorito={alternarFavorito}
+    />
+  ), [alternarFavorito, textosFavoritos, removerDoHistorico, navegarParaResultado]);
+
+  const renderizarListaVazia = useCallback(() => (
+    <View style={estilos.vazio}>
+      <Ionicons name="time-outline" size={48} color={cores.inputBorda} />
+      <Text style={estilos.vazioTexto}>
+        {historico.length === 0
+          ? 'Nenhuma tradução realizada ainda'
+          : 'Nenhum resultado encontrado'}
+      </Text>
+    </View>
+  ), [cores.inputBorda, estilos.vazio, estilos.vazioTexto, historico.length]);
 
   return (
     <SafeAreaView style={estilos.container} edges={['top']}>
@@ -91,60 +129,33 @@ const TelaHistorico: React.FC = () => {
           <Text style={estilos.titulo}>Histórico</Text>
           <Text style={estilos.subtitulo}>Suas Traduções Recentes</Text>
         </View>
-        {historico.length > 0 && (
-          <TouchableOpacity onPress={confirmarLimpeza} style={estilos.botaoLimpar}>
-            <Ionicons name="trash-outline" size={20} color={cores.erro} />
-          </TouchableOpacity>
-        )}
+        <TouchableOpacity
+          onPress={confirmarLimpeza}
+          style={[
+            estilos.botaoLimpar,
+            historico.length === 0 && estilos.botaoLimparOculto,
+          ]}
+          disabled={historico.length === 0}
+          accessibilityElementsHidden={historico.length === 0}
+          importantForAccessibility={historico.length === 0 ? 'no-hide-descendants' : 'auto'}
+        >
+          <Ionicons name="trash-outline" size={20} color={cores.erro} />
+        </TouchableOpacity>
       </View>
 
-      <ScrollView
+      <FlatList
         style={estilos.conteudo}
         contentContainerStyle={estilos.conteudoInner}
         showsVerticalScrollIndicator={false}
-      >
-        {/* Busca */}
-        <CampoBusca
-          valor={busca}
-          aoMudar={setBusca}
-          placeholder="Busque no Histórico"
-        />
-
-        {/* Estatísticas / Filtros */}
-        <CardsEstatisticas
-          estatisticas={estatisticas}
-          filtroAtivo={filtro}
-          aoSelecionarFiltro={setFiltro}
-        />
-
-        {/* Lista */}
-        {itensFiltrados.map((item) => (
-          <CardItem
-            key={item.id}
-            id={item.id}
-            tipo={item.tipo}
-            texto={item.texto}
-            data={item.data}
-            modo="historico"
-            ehFavorito={ehFavorito(item.texto)}
-            aoRemover={removerDoHistorico}
-            aoPlay={navegarParaResultado}
-            aoAlternarFavorito={alternarFavorito}
-          />
-        ))}
-
-        {/* Estado vazio */}
-        {itensFiltrados.length === 0 && (
-          <View style={estilos.vazio}>
-            <Ionicons name="time-outline" size={48} color={cores.inputBorda} />
-            <Text style={estilos.vazioTexto}>
-              {historico.length === 0
-                ? 'Nenhuma tradução realizada ainda'
-                : 'Nenhum resultado encontrado'}
-            </Text>
-          </View>
-        )}
-      </ScrollView>
+        data={itensFiltrados}
+        keyExtractor={obterChaveItem}
+        renderItem={renderizarItem}
+        ListHeaderComponent={renderizarCabecalhoLista}
+        ListEmptyComponent={renderizarListaVazia}
+        initialNumToRender={8}
+        maxToRenderPerBatch={8}
+        windowSize={7}
+      />
 
       <BarraInferior telaAtiva="Histórico" />
     </SafeAreaView>
@@ -178,7 +189,13 @@ const criarEstilos = (cores: Cores, fatorFonte: number = 1) => StyleSheet.create
     marginTop: 2,
   },
   botaoLimpar: {
-    padding: 8,
+    width: 36,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  botaoLimparOculto: {
+    opacity: 0,
   },
   conteudo: {
     flex: 1,

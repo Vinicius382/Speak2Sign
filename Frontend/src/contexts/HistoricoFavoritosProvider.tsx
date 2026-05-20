@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from './AuthProvider';
 import { useConfiguracoes } from './ConfiguracoesProvider';
@@ -12,7 +12,6 @@ import {
   removerFavoritoApi,
 } from '../services/api';
 
-// Tipos
 export type TipoTraducao = 'voz' | 'texto' | 'libras';
 
 export type ItemHistorico = {
@@ -31,10 +30,19 @@ export type ItemFavorito = {
   data: string;
 };
 
-// Interface do contexto
+export type EstatisticasTraducoes = {
+  total: number;
+  voz: number;
+  texto: number;
+  libras: number;
+};
+
 interface HistoricoFavoritosContexto {
   historico: ItemHistorico[];
   favoritos: ItemFavorito[];
+  estatisticasHistorico: EstatisticasTraducoes;
+  estatisticasFavoritos: EstatisticasTraducoes;
+  textosFavoritos: ReadonlySet<string>;
   adicionarAoHistorico: (texto: string, tipo: TipoTraducao) => void;
   removerDoHistorico: (id: string) => void;
   limparHistorico: () => void;
@@ -50,7 +58,6 @@ const CHAVE_HISTORICO = '@speak2sign_historico';
 
 const HistoricoFavoritosContext = createContext<HistoricoFavoritosContexto | undefined>(undefined);
 
-// Hook de acesso
 export const useHistoricoFavoritos = (): HistoricoFavoritosContexto => {
   const contexto = useContext(HistoricoFavoritosContext);
   if (!contexto) {
@@ -59,7 +66,6 @@ export const useHistoricoFavoritos = (): HistoricoFavoritosContexto => {
   return contexto;
 };
 
-// Formatar data
 const formatarData = (): string => {
   return new Date().toLocaleDateString('pt-BR', {
     day: '2-digit',
@@ -90,7 +96,21 @@ const chaveHistorico = (item: Pick<ItemHistorico, 'tipo' | 'texto' | 'data'>): s
 const chaveFavorito = (item: Pick<ItemFavorito, 'tipo' | 'texto'>): string =>
   `${item.tipo}:${item.texto}`;
 
-// Provider
+const criarEstatisticasVazias = (): EstatisticasTraducoes => ({
+  total: 0,
+  voz: 0,
+  texto: 0,
+  libras: 0,
+});
+
+const calcularEstatisticas = (itens: Array<Pick<ItemHistorico, 'tipo'>>): EstatisticasTraducoes => {
+  return itens.reduce<EstatisticasTraducoes>((estatisticas, item) => {
+    estatisticas.total += 1;
+    estatisticas[item.tipo] += 1;
+    return estatisticas;
+  }, criarEstatisticasVazias());
+};
+
 export const HistoricoFavoritosProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [historico, setHistorico] = useState<ItemHistorico[]>([]);
   const [favoritos, setFavoritos] = useState<ItemFavorito[]>([]);
@@ -98,7 +118,13 @@ export const HistoricoFavoritosProvider: React.FC<{ children: React.ReactNode }>
   const { config } = useConfiguracoes();
   const sincronizouRef = useRef(false);
 
-  // Carregar dados locais ao iniciar
+  const estatisticasHistorico = useMemo(() => calcularEstatisticas(historico), [historico]);
+  const estatisticasFavoritos = useMemo(() => calcularEstatisticas(favoritos), [favoritos]);
+  const textosFavoritos = useMemo<ReadonlySet<string>>(
+    () => new Set(favoritos.map((favorito) => favorito.texto)),
+    [favoritos]
+  );
+
   useEffect(() => {
     carregarDadosLocais();
   }, []);
@@ -339,32 +365,52 @@ export const HistoricoFavoritosProvider: React.FC<{ children: React.ReactNode }>
   }, []);
 
   const ehFavorito = useCallback((texto: string): boolean => {
-    return favoritos.some((f) => f.texto === texto);
-  }, [favoritos]);
+    return textosFavoritos.has(texto);
+  }, [textosFavoritos]);
 
   const alternarFavorito = useCallback((texto: string, tipo: TipoTraducao) => {
-    const existente = favoritos.find((f) => f.texto === texto);
-    if (existente) {
+    if (textosFavoritos.has(texto)) {
+      const existente = favoritos.find((f) => f.texto === texto);
+      if (!existente) return;
       removerFavorito(existente.id);
     } else {
       adicionarFavorito(texto, tipo);
     }
-  }, [favoritos, removerFavorito, adicionarFavorito]);
+  }, [favoritos, textosFavoritos, removerFavorito, adicionarFavorito]);
+
+  const valorContexto = useMemo(() => ({
+    historico,
+    favoritos,
+    estatisticasHistorico,
+    estatisticasFavoritos,
+    textosFavoritos,
+    adicionarAoHistorico,
+    removerDoHistorico,
+    limparHistorico: limparTodoHistorico,
+    limparDadosLocais,
+    adicionarFavorito,
+    removerFavorito,
+    alternarFavorito,
+    ehFavorito,
+  }), [
+    historico,
+    favoritos,
+    estatisticasHistorico,
+    estatisticasFavoritos,
+    textosFavoritos,
+    adicionarAoHistorico,
+    removerDoHistorico,
+    limparTodoHistorico,
+    limparDadosLocais,
+    adicionarFavorito,
+    removerFavorito,
+    alternarFavorito,
+    ehFavorito,
+  ]);
 
   return (
     <HistoricoFavoritosContext.Provider
-      value={{
-        historico,
-        favoritos,
-        adicionarAoHistorico,
-        removerDoHistorico,
-        limparHistorico: limparTodoHistorico,
-        limparDadosLocais,
-        adicionarFavorito,
-        removerFavorito,
-        alternarFavorito,
-        ehFavorito,
-      }}
+      value={valorContexto}
     >
       {children}
     </HistoricoFavoritosContext.Provider>

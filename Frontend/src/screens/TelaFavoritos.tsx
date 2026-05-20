@@ -1,10 +1,11 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
+  FlatList,
   StatusBar,
+  ListRenderItem,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -18,29 +19,22 @@ import BotaoVoltar from '../components/BotaoVoltar';
 import CampoBusca from '../components/CampoBusca';
 import CardsEstatisticas, { FiltroTipo } from '../components/CardsEstatisticas';
 import CardItem from '../components/CardItem';
-import { useHistoricoFavoritos } from '../contexts/HistoricoFavoritosProvider';
+import { useHistoricoFavoritos, type ItemFavorito } from '../contexts/HistoricoFavoritosProvider';
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 const TelaFavoritos: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
   const { cores, estaEscuro, fatorFonte } = useCores();
   const estilos = useMemo(() => criarEstilos(cores, fatorFonte), [cores, fatorFonte]);
-  const { favoritos, removerFavorito } = useHistoricoFavoritos();
+  const { favoritos, estatisticasFavoritos, removerFavorito } = useHistoricoFavoritos();
 
   const [busca, setBusca] = useState('');
   const [filtro, setFiltro] = useState<FiltroTipo>('todos');
 
-  // Estatísticas
-  const estatisticas = useMemo(() => ({
-    total: favoritos.length,
-    voz: favoritos.filter((f) => f.tipo === 'voz').length,
-    texto: favoritos.filter((f) => f.tipo === 'texto').length,
-    libras: favoritos.filter((f) => f.tipo === 'libras').length,
-  }), [favoritos]);
-
   // Itens filtrados
   const itensFiltrados = useMemo(() => {
     let itens = favoritos;
+    const termoBusca = busca.trim().toLowerCase();
 
     // Filtro por tipo
     if (filtro !== 'todos') {
@@ -48,18 +42,59 @@ const TelaFavoritos: React.FC = () => {
     }
 
     // Filtro por busca
-    if (busca.trim()) {
+    if (termoBusca) {
       itens = itens.filter((item) =>
-        item.texto.toLowerCase().includes(busca.toLowerCase())
+        item.texto.toLowerCase().includes(termoBusca)
       );
     }
 
     return itens;
   }, [favoritos, filtro, busca]);
 
-  const navegarParaResultado = (texto: string) => {
+  const navegarParaResultado = useCallback((texto: string) => {
     navigation.navigate('ResultadoLibras', { texto });
-  };
+  }, [navigation]);
+
+  const obterChaveItem = useCallback((item: ItemFavorito) => item.id, []);
+
+  const renderizarCabecalhoLista = useMemo(() => (
+    <>
+      <CampoBusca
+        valor={busca}
+        aoMudar={setBusca}
+        placeholder="Busque Mensagens Favoritas"
+      />
+
+      <CardsEstatisticas
+        estatisticas={estatisticasFavoritos}
+        filtroAtivo={filtro}
+        aoSelecionarFiltro={setFiltro}
+      />
+    </>
+  ), [busca, estatisticasFavoritos, filtro]);
+
+  const renderizarItem: ListRenderItem<ItemFavorito> = useCallback(({ item }) => (
+    <CardItem
+      id={item.id}
+      tipo={item.tipo}
+      texto={item.texto}
+      data={item.data}
+      modo="favorito"
+      aoRemover={removerFavorito}
+      aoPlay={navegarParaResultado}
+    />
+  ), [removerFavorito, navegarParaResultado]);
+
+  const renderizarListaVazia = useCallback(() => (
+    <View style={estilos.vazio}>
+      <Ionicons name="star-outline" size={48} color={cores.inputBorda} />
+      <Text style={estilos.vazioTexto}>
+        {favoritos.length === 0
+          ? 'Nenhum favorito salvo ainda'
+          : 'Nenhum resultado encontrado'}
+      </Text>
+    </View>
+  ), [cores.inputBorda, estilos.vazio, estilos.vazioTexto, favoritos.length]);
 
   return (
     <SafeAreaView style={estilos.container} edges={['top']}>
@@ -74,51 +109,20 @@ const TelaFavoritos: React.FC = () => {
         </View>
       </View>
 
-      <ScrollView
+      <FlatList
         style={estilos.conteudo}
         contentContainerStyle={estilos.conteudoInner}
         showsVerticalScrollIndicator={false}
-      >
-        {/* Busca */}
-        <CampoBusca
-          valor={busca}
-          aoMudar={setBusca}
-          placeholder="Busque Mensagens Favoritas"
-        />
-
-        {/* Estatísticas / Filtros */}
-        <CardsEstatisticas
-          estatisticas={estatisticas}
-          filtroAtivo={filtro}
-          aoSelecionarFiltro={setFiltro}
-        />
-
-        {/* Lista */}
-        {itensFiltrados.map((favorito) => (
-          <CardItem
-            key={favorito.id}
-            id={favorito.id}
-            tipo={favorito.tipo}
-            texto={favorito.texto}
-            data={favorito.data}
-            modo="favorito"
-            aoRemover={removerFavorito}
-            aoPlay={navegarParaResultado}
-          />
-        ))}
-
-        {/* Estado vazio */}
-        {itensFiltrados.length === 0 && (
-          <View style={estilos.vazio}>
-            <Ionicons name="star-outline" size={48} color={cores.inputBorda} />
-            <Text style={estilos.vazioTexto}>
-              {favoritos.length === 0
-                ? 'Nenhum favorito salvo ainda'
-                : 'Nenhum resultado encontrado'}
-            </Text>
-          </View>
-        )}
-      </ScrollView>
+        data={itensFiltrados}
+        keyExtractor={obterChaveItem}
+        renderItem={renderizarItem}
+        ListHeaderComponent={renderizarCabecalhoLista}
+        ListEmptyComponent={renderizarListaVazia}
+        initialNumToRender={8}
+        maxToRenderPerBatch={8}
+        windowSize={7}
+        removeClippedSubviews
+      />
 
       <BarraInferior telaAtiva="Favoritos" />
     </SafeAreaView>

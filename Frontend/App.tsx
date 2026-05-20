@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { useFonts, PlayfairDisplay_700Bold } from '@expo-google-fonts/playfair-display';
 import { ActivityIndicator, View } from 'react-native';
+import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context';
 import NavegacaoPrincipal from './src/navigation/NavegacaoPrincipal';
 import { cores } from './src/theme/cores';
 import { VLibrasProvider } from './src/contexts/VLibrasProvider';
@@ -24,18 +25,19 @@ export default function App() {
   }
 
   return (
-    <AuthProvider>
-      <ConfiguracoesProvider>
-        <HistoricoFavoritosProvider>
-          <VLibrasProvider>
-            <NavigationContainer>
-              <StatusBar style="dark" />
-              <NavegacaoPrincipal />
-            </NavigationContainer>
-          </VLibrasProvider>
-        </HistoricoFavoritosProvider>
-      </ConfiguracoesProvider>
-    </AuthProvider>
+    <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+      <AuthProvider>
+        <ConfiguracoesProvider>
+          <HistoricoFavoritosProvider>
+            <VLibrasProvider>
+              <NavigationContainer>
+                <StatusBar style="dark" />
+                <NavegacaoPrincipal />
+              </NavigationContainer>
+            </VLibrasProvider>
+          </HistoricoFavoritosProvider>
+        </ConfiguracoesProvider>
+      </AuthProvider>
+    </SafeAreaProvider>
   );
 }
-
