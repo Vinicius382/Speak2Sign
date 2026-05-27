@@ -33,7 +33,7 @@ const TelaLogin: React.FC<TelaLoginProps> = ({ navigation }) => {
   const [senha, setSenha] = useState('');
   const [carregando, setCarregando] = useState(false);
   const [erros, setErros] = useState<{ email?: string; senha?: string }>({});
-  const { salvarUsuario } = useAuth();
+  const { salvarSessao } = useAuth();
   
   const { cores, fatorFonte } = useCores();
   const estilos = useMemo(() => criarEstilos(cores, fatorFonte), [cores, fatorFonte]);
@@ -61,7 +61,7 @@ const TelaLogin: React.FC<TelaLoginProps> = ({ navigation }) => {
     setCarregando(true);
     try {
       const resposta = await loginUsuario({ email: email.trim(), senha });
-      await salvarUsuario({ id: resposta.id, nome: resposta.nome, email: resposta.email });
+      await salvarSessao(resposta);
       navigation.reset({
         index: 0,
         routes: [{ name: 'Inicial' }],

@@ -4,6 +4,7 @@ import com.speak2sign.model.Usuario;
 import com.speak2sign.repository.UsuarioRepository;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
@@ -15,12 +16,17 @@ public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
     private final EmailService emailService;
+    private final boolean emailEnabled;
     private final SecureRandom secureRandom = new SecureRandom();
 
     @Autowired
-    public UsuarioService(UsuarioRepository usuarioRepository, EmailService emailService) {
+    public UsuarioService(
+            UsuarioRepository usuarioRepository,
+            EmailService emailService,
+            @Value("${email.enabled:true}") boolean emailEnabled) {
         this.usuarioRepository = usuarioRepository;
         this.emailService = emailService;
+        this.emailEnabled = emailEnabled;
     }
 
     public Usuario cadastrar(Usuario usuario) {
@@ -35,10 +41,12 @@ public class UsuarioService {
 
         Usuario usuarioSalvo = usuarioRepository.save(usuario);
 
-        try {
-            emailService.enviarEmailCadastro(usuarioSalvo.getEmail(), usuarioSalvo.getNome());
-        } catch (Exception e) {
-            System.err.println("Falha ao enviar email: " + e.getMessage());
+        if (emailEnabled) {
+            try {
+                emailService.enviarEmailCadastro(usuarioSalvo.getEmail(), usuarioSalvo.getNome());
+            } catch (Exception e) {
+                System.err.println("Falha ao enviar email: " + e.getMessage());
+            }
         }
 
         return usuarioSalvo;
@@ -68,11 +76,13 @@ public class UsuarioService {
         usuario.setResetTokenExpiration(LocalDateTime.now().plusMinutes(15));
         usuarioRepository.save(usuario);
 
-        try {
-            emailService.enviarEmailRedefinirSenha(usuario.getEmail(), usuario.getNome(), token);
-        } catch (Exception e) {
-            System.err.println("Falha ao enviar email de redefinição: " + e.getMessage());
-            throw new RuntimeException("Erro ao enviar o e-mail de recuperação. Tente novamente.");
+        if (emailEnabled) {
+            try {
+                emailService.enviarEmailRedefinirSenha(usuario.getEmail(), usuario.getNome(), token);
+            } catch (Exception e) {
+                System.err.println("Falha ao enviar email de redefinição: " + e.getMessage());
+                throw new RuntimeException("Erro ao enviar o e-mail de recuperação. Tente novamente.");
+            }
         }
     }
 

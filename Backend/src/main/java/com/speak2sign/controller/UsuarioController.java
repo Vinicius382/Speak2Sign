@@ -4,10 +4,12 @@ import com.speak2sign.dto.AtualizarPerfilDTO;
 import com.speak2sign.dto.AlterarSenhaDTO;
 import com.speak2sign.dto.CadastroRequestDTO;
 import com.speak2sign.dto.EsqueciSenhaRequestDTO;
+import com.speak2sign.dto.LoginResponseDTO;
 import com.speak2sign.dto.LoginRequestDTO;
 import com.speak2sign.dto.RedefinirSenhaRequestDTO;
 import com.speak2sign.dto.UsuarioResponseDTO;
 import com.speak2sign.model.Usuario;
+import com.speak2sign.security.JwtService;
 import com.speak2sign.service.UsuarioService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,10 +23,12 @@ import java.util.Map;
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
+    private final JwtService jwtService;
 
     @Autowired
-    public UsuarioController(UsuarioService usuarioService) {
+    public UsuarioController(UsuarioService usuarioService, JwtService jwtService) {
         this.usuarioService = usuarioService;
+        this.jwtService = jwtService;
     }
 
     @PostMapping("/cadastrar")
@@ -39,9 +43,10 @@ public class UsuarioController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<UsuarioResponseDTO> login(@Valid @RequestBody LoginRequestDTO dto) {
+    public ResponseEntity<LoginResponseDTO> login(@Valid @RequestBody LoginRequestDTO dto) {
         Usuario usuarioLogado = usuarioService.login(dto.getEmail(), dto.getSenha());
-        return ResponseEntity.ok(UsuarioResponseDTO.fromEntity(usuarioLogado));
+        String token = jwtService.gerarToken(usuarioLogado);
+        return ResponseEntity.ok(new LoginResponseDTO(token, UsuarioResponseDTO.fromEntity(usuarioLogado)));
     }
 
     @PostMapping("/esqueci-senha")
@@ -56,19 +61,4 @@ public class UsuarioController {
         return ResponseEntity.ok(Map.of("mensagem", "Senha redefinida com sucesso!"));
     }
 
-    @PutMapping("/{id}/atualizar")
-    public ResponseEntity<UsuarioResponseDTO> atualizarPerfil(
-            @PathVariable Long id,
-            @Valid @RequestBody AtualizarPerfilDTO dto) {
-        Usuario usuarioAtualizado = usuarioService.atualizarPerfil(id, dto.getNome());
-        return ResponseEntity.ok(UsuarioResponseDTO.fromEntity(usuarioAtualizado));
-    }
-
-    @PutMapping("/{id}/alterar-senha")
-    public ResponseEntity<Map<String, String>> alterarSenha(
-            @PathVariable Long id,
-            @Valid @RequestBody AlterarSenhaDTO dto) {
-        usuarioService.alterarSenha(id, dto.getSenhaAtual(), dto.getNovaSenha());
-        return ResponseEntity.ok(Map.of("mensagem", "Senha alterada com sucesso!"));
-    }
 }

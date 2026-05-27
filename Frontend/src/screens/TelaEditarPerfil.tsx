@@ -49,7 +49,7 @@ const TelaEditarPerfil: React.FC = () => {
     setErro(undefined);
 
     try {
-      await atualizarPerfil(usuario.id, { nome: nome.trim() });
+      await atualizarPerfil({ nome: nome.trim() });
       await atualizarNome(nome.trim());
       Alert.alert('Sucesso!', 'Nome atualizado com sucesso.', [
         { text: 'OK', onPress: () => navigation.goBack() },

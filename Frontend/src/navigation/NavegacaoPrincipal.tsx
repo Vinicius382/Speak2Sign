@@ -1,4 +1,5 @@
 import React from 'react';
+import { ActivityIndicator, View } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import TelaLogin from '../screens/TelaLogin';
 import TelaCadastro from '../screens/TelaCadastro';
@@ -16,6 +17,8 @@ import TelaMinhaConta from '../screens/TelaMinhaConta';
 import TelaEditarPerfil from '../screens/TelaEditarPerfil';
 import TelaAlterarSenha from '../screens/TelaAlterarSenha';
 import TelaDicionario from '../screens/TelaDicionario';
+import { useAuth } from '../contexts/AuthProvider';
+import { cores } from '../theme/cores';
 
 export type RootStackParamList = {
   Login: undefined;
@@ -39,9 +42,20 @@ export type RootStackParamList = {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const NavegacaoPrincipal: React.FC = () => {
+  const { usuario, carregandoSessao } = useAuth();
+
+  if (carregandoSessao) {
+    return (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: cores.fundo }}>
+        <ActivityIndicator size="large" color={cores.destaque} />
+      </View>
+    );
+  }
+
   return (
     <Stack.Navigator
-      initialRouteName="Login"
+      key={usuario ? 'autenticado' : 'visitante'}
+      initialRouteName={usuario ? 'Inicial' : 'Login'}
       screenOptions={{
         headerShown: false,
         animation: 'none',

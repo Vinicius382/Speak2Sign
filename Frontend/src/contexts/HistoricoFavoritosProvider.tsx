@@ -163,8 +163,8 @@ export const HistoricoFavoritosProvider: React.FC<{ children: React.ReactNode }>
     try {
       // Buscar dados do backend
       const [historicoRemoto, favoritosRemotos] = await Promise.all([
-        listarHistorico(usuario.id),
-        listarFavoritos(usuario.id),
+        listarHistorico(),
+        listarFavoritos(),
       ]);
 
       // Converter para formato local
@@ -196,7 +196,7 @@ export const HistoricoFavoritosProvider: React.FC<{ children: React.ReactNode }>
         );
 
         locaisPendentes.forEach((item) => {
-          adicionarHistoricoApi(usuario.id, { tipo: item.tipo, texto: item.texto })
+          adicionarHistoricoApi({ tipo: item.tipo, texto: item.texto })
             .then((resposta) => {
               atualizarHistoricoLocal((atuais) =>
                 atuais.map((atual) =>
@@ -223,7 +223,7 @@ export const HistoricoFavoritosProvider: React.FC<{ children: React.ReactNode }>
         );
 
         locaisPendentes.forEach((item) => {
-          adicionarFavoritoApi(usuario.id, { tipo: item.tipo, texto: item.texto })
+          adicionarFavoritoApi({ tipo: item.tipo, texto: item.texto })
             .then((resposta) => {
               atualizarFavoritosLocal((atuais) =>
                 atuais.map((atual) =>
@@ -273,7 +273,7 @@ export const HistoricoFavoritosProvider: React.FC<{ children: React.ReactNode }>
     atualizarHistoricoLocal((prev) => [novoItem, ...prev]);
 
     if (usuario && podeSincronizar()) {
-      adicionarHistoricoApi(usuario.id, { tipo, texto })
+      adicionarHistoricoApi({ tipo, texto })
         .then((resposta) => {
           atualizarHistoricoLocal((prev) =>
             prev.map((item) =>
@@ -294,7 +294,7 @@ export const HistoricoFavoritosProvider: React.FC<{ children: React.ReactNode }>
       return;
     }
 
-    removerHistoricoApi(usuario.id, item.idRemoto)
+    removerHistoricoApi(item.idRemoto)
       .then(() => {
         atualizarHistoricoLocal((prev) => prev.filter((h) => h.id !== id));
       })
@@ -307,7 +307,7 @@ export const HistoricoFavoritosProvider: React.FC<{ children: React.ReactNode }>
       return;
     }
 
-    limparHistoricoApi(usuario.id)
+    limparHistoricoApi()
       .then(() => {
         atualizarHistoricoLocal(() => []);
       })
@@ -330,7 +330,7 @@ export const HistoricoFavoritosProvider: React.FC<{ children: React.ReactNode }>
     });
 
     if (usuario && podeSincronizar()) {
-      adicionarFavoritoApi(usuario.id, { tipo, texto })
+      adicionarFavoritoApi({ tipo, texto })
         .then((resposta) => {
           atualizarFavoritosLocal((prev) =>
             prev.map((item) =>
@@ -351,7 +351,7 @@ export const HistoricoFavoritosProvider: React.FC<{ children: React.ReactNode }>
       return;
     }
 
-    removerFavoritoApi(usuario.id, item.idRemoto)
+    removerFavoritoApi(item.idRemoto)
       .then(() => {
         atualizarFavoritosLocal((prev) => prev.filter((f) => f.id !== id));
       })

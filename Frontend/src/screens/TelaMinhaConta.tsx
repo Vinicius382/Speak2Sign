@@ -25,7 +25,7 @@ import BotaoVoltar from '../components/BotaoVoltar';
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 const TelaMinhaConta: React.FC = () => {
-  const { usuario, limparUsuario } = useAuth();
+  const { usuario, limparSessao } = useAuth();
   const navigation = useNavigation<NavigationProp>();
   const { cores, estaEscuro, fatorFonte } = useCores();
   const estilos = useMemo(() => criarEstilos(cores, fatorFonte), [cores, fatorFonte]);
@@ -167,7 +167,7 @@ const TelaMinhaConta: React.FC = () => {
           text: 'Sair',
           style: 'destructive',
           onPress: async () => {
-            await limparUsuario();
+            await limparSessao();
             navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
           },
         },

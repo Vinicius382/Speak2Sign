@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { configurarTokenAutenticacao, type LoginResposta } from '../services/api';
 
 export interface UsuarioLogado {
   id: number;
@@ -9,12 +10,15 @@ export interface UsuarioLogado {
 
 interface AuthContexto {
   usuario: UsuarioLogado | null;
-  salvarUsuario: (usuario: UsuarioLogado) => Promise<void>;
-  limparUsuario: () => Promise<void>;
+  token: string | null;
+  carregandoSessao: boolean;
+  salvarSessao: (resposta: LoginResposta) => Promise<void>;
+  limparSessao: () => Promise<void>;
   atualizarNome: (novoNome: string) => Promise<void>;
 }
 
 const CHAVE_USUARIO = '@speak2sign_usuario';
+const CHAVE_TOKEN = '@speak2sign_token';
 
 const AuthContext = createContext<AuthContexto | undefined>(undefined);
 
@@ -28,37 +32,60 @@ export const useAuth = (): AuthContexto => {
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [usuario, setUsuario] = useState<UsuarioLogado | null>(null);
+  const [token, setToken] = useState<string | null>(null);
+  const [carregandoSessao, setCarregandoSessao] = useState(true);
 
-  // Carregar usuário salvo ao iniciar
+  // Carregar sessão salva ao iniciar
   useEffect(() => {
     const carregar = async () => {
       try {
-        const armazenado = await AsyncStorage.getItem(CHAVE_USUARIO);
-        if (armazenado) {
-          setUsuario(JSON.parse(armazenado));
+        const [usuarioArmazenado, tokenArmazenado] = await Promise.all([
+          AsyncStorage.getItem(CHAVE_USUARIO),
+          AsyncStorage.getItem(CHAVE_TOKEN),
+        ]);
+
+        if (usuarioArmazenado && tokenArmazenado) {
+          const usuarioSalvo = JSON.parse(usuarioArmazenado);
+          setUsuario(usuarioSalvo);
+          setToken(tokenArmazenado);
+          configurarTokenAutenticacao(tokenArmazenado);
+        } else {
+          await AsyncStorage.multiRemove([CHAVE_USUARIO, CHAVE_TOKEN]);
+          configurarTokenAutenticacao(null);
         }
       } catch (e) {
-        console.error('Erro ao carregar usuário:', e);
+        console.error('Erro ao carregar sessão:', e);
+        await AsyncStorage.multiRemove([CHAVE_USUARIO, CHAVE_TOKEN]);
+        configurarTokenAutenticacao(null);
+      } finally {
+        setCarregandoSessao(false);
       }
     };
     carregar();
   }, []);
 
-  const salvarUsuario = async (novoUsuario: UsuarioLogado) => {
+  const salvarSessao = async (resposta: LoginResposta) => {
     try {
-      await AsyncStorage.setItem(CHAVE_USUARIO, JSON.stringify(novoUsuario));
-      setUsuario(novoUsuario);
+      await AsyncStorage.multiSet([
+        [CHAVE_USUARIO, JSON.stringify(resposta.usuario)],
+        [CHAVE_TOKEN, resposta.token],
+      ]);
+      setUsuario(resposta.usuario);
+      setToken(resposta.token);
+      configurarTokenAutenticacao(resposta.token);
     } catch (e) {
-      console.error('Erro ao salvar usuário:', e);
+      console.error('Erro ao salvar sessão:', e);
     }
   };
 
-  const limparUsuario = async () => {
+  const limparSessao = async () => {
     try {
-      await AsyncStorage.removeItem(CHAVE_USUARIO);
+      await AsyncStorage.multiRemove([CHAVE_USUARIO, CHAVE_TOKEN]);
       setUsuario(null);
+      setToken(null);
+      configurarTokenAutenticacao(null);
     } catch (e) {
-      console.error('Erro ao limpar usuário:', e);
+      console.error('Erro ao limpar sessão:', e);
     }
   };
 
@@ -74,9 +101,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ usuario, salvarUsuario, limparUsuario, atualizarNome }}>
+    <AuthContext.Provider value={{ usuario, token, carregandoSessao, salvarSessao, limparSessao, atualizarNome }}>
       {children}
     </AuthContext.Provider>
   );
 };
-

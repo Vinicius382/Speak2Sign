@@ -68,7 +68,7 @@ const TelaAlterarSenha: React.FC = () => {
     setCarregando(true);
 
     try {
-      await alterarSenhaApi(usuario.id, {
+      await alterarSenhaApi({
         senhaAtual,
         novaSenha,
       });

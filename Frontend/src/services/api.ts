@@ -1,4 +1,8 @@
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const CHAVE_TOKEN = '@speak2sign_token';
+let tokenAutenticacao: string | null = null;
 
 const api = axios.create({
   baseURL: 'https://speak2sign.onrender.com',
@@ -6,6 +10,28 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
   timeout: 10000,
+});
+
+export const configurarTokenAutenticacao = (token: string | null) => {
+  tokenAutenticacao = token;
+
+  if (token) {
+    api.defaults.headers.common.Authorization = `Bearer ${token}`;
+  } else {
+    delete api.defaults.headers.common.Authorization;
+  }
+};
+
+api.interceptors.request.use(async (config) => {
+  if (!tokenAutenticacao) {
+    tokenAutenticacao = await AsyncStorage.getItem(CHAVE_TOKEN);
+  }
+
+  if (tokenAutenticacao) {
+    config.headers.Authorization = `Bearer ${tokenAutenticacao}`;
+  }
+
+  return config;
 });
 
 // === Tipos ===
@@ -40,10 +66,15 @@ interface AlterarSenhaPayload {
   novaSenha: string;
 }
 
-interface UsuarioResposta {
+export interface UsuarioResposta {
   id: number;
   nome: string;
   email: string;
+}
+
+export interface LoginResposta {
+  token: string;
+  usuario: UsuarioResposta;
 }
 
 interface MensagemResposta {
@@ -81,8 +112,8 @@ interface FavoritoResposta {
 
 // === Autenticação ===
 
-export const loginUsuario = async (payload: LoginPayload): Promise<UsuarioResposta> => {
-  const resposta = await api.post<UsuarioResposta>('/api/usuarios/login', payload);
+export const loginUsuario = async (payload: LoginPayload): Promise<LoginResposta> => {
+  const resposta = await api.post<LoginResposta>('/api/usuarios/login', payload);
   return resposta.data;
 };
 
@@ -103,52 +134,52 @@ export const redefinirSenha = async (payload: RedefinirSenhaPayload): Promise<Me
 
 // === Histórico ===
 
-export const listarHistorico = async (usuarioId: number): Promise<HistoricoResposta[]> => {
-  const resposta = await api.get<HistoricoResposta[]>(`/api/usuarios/${usuarioId}/historico`);
+export const listarHistorico = async (): Promise<HistoricoResposta[]> => {
+  const resposta = await api.get<HistoricoResposta[]>('/api/usuario/historico');
   return resposta.data;
 };
 
-export const adicionarHistoricoApi = async (usuarioId: number, payload: HistoricoPayload): Promise<HistoricoResposta> => {
-  const resposta = await api.post<HistoricoResposta>(`/api/usuarios/${usuarioId}/historico`, payload);
+export const adicionarHistoricoApi = async (payload: HistoricoPayload): Promise<HistoricoResposta> => {
+  const resposta = await api.post<HistoricoResposta>('/api/usuario/historico', payload);
   return resposta.data;
 };
 
-export const removerHistoricoApi = async (usuarioId: number, itemId: number): Promise<MensagemResposta> => {
-  const resposta = await api.delete<MensagemResposta>(`/api/usuarios/${usuarioId}/historico/${itemId}`);
+export const removerHistoricoApi = async (itemId: number): Promise<MensagemResposta> => {
+  const resposta = await api.delete<MensagemResposta>(`/api/usuario/historico/${itemId}`);
   return resposta.data;
 };
 
-export const limparHistoricoApi = async (usuarioId: number): Promise<MensagemResposta> => {
-  const resposta = await api.delete<MensagemResposta>(`/api/usuarios/${usuarioId}/historico`);
+export const limparHistoricoApi = async (): Promise<MensagemResposta> => {
+  const resposta = await api.delete<MensagemResposta>('/api/usuario/historico');
   return resposta.data;
 };
 
 // === Favoritos ===
 
-export const listarFavoritos = async (usuarioId: number): Promise<FavoritoResposta[]> => {
-  const resposta = await api.get<FavoritoResposta[]>(`/api/usuarios/${usuarioId}/favoritos`);
+export const listarFavoritos = async (): Promise<FavoritoResposta[]> => {
+  const resposta = await api.get<FavoritoResposta[]>('/api/usuario/favoritos');
   return resposta.data;
 };
 
-export const adicionarFavoritoApi = async (usuarioId: number, payload: FavoritoPayload): Promise<FavoritoResposta> => {
-  const resposta = await api.post<FavoritoResposta>(`/api/usuarios/${usuarioId}/favoritos`, payload);
+export const adicionarFavoritoApi = async (payload: FavoritoPayload): Promise<FavoritoResposta> => {
+  const resposta = await api.post<FavoritoResposta>('/api/usuario/favoritos', payload);
   return resposta.data;
 };
 
-export const removerFavoritoApi = async (usuarioId: number, itemId: number): Promise<MensagemResposta> => {
-  const resposta = await api.delete<MensagemResposta>(`/api/usuarios/${usuarioId}/favoritos/${itemId}`);
+export const removerFavoritoApi = async (itemId: number): Promise<MensagemResposta> => {
+  const resposta = await api.delete<MensagemResposta>(`/api/usuario/favoritos/${itemId}`);
   return resposta.data;
 };
 
 // === Perfil ===
 
-export const atualizarPerfil = async (usuarioId: number, payload: AtualizarPerfilPayload): Promise<UsuarioResposta> => {
-  const resposta = await api.put<UsuarioResposta>(`/api/usuarios/${usuarioId}/atualizar`, payload);
+export const atualizarPerfil = async (payload: AtualizarPerfilPayload): Promise<UsuarioResposta> => {
+  const resposta = await api.put<UsuarioResposta>('/api/usuario/perfil', payload);
   return resposta.data;
 };
 
-export const alterarSenhaApi = async (usuarioId: number, payload: AlterarSenhaPayload): Promise<MensagemResposta> => {
-  const resposta = await api.put<MensagemResposta>(`/api/usuarios/${usuarioId}/alterar-senha`, payload);
+export const alterarSenhaApi = async (payload: AlterarSenhaPayload): Promise<MensagemResposta> => {
+  const resposta = await api.put<MensagemResposta>('/api/usuario/senha', payload);
   return resposta.data;
 };
 
