@@ -34,7 +34,6 @@ class VlibrasPersonalizacaoControllerTests {
                 .andExpect(jsonPath("$.iris").value("#000000"))
                 .andExpect(jsonPath("$.olhos").value("#FFFFFF"))
                 .andExpect(jsonPath("$.sobrancelhas").value("#000000"))
-                .andExpect(jsonPath("$.logo").value("https://example.com/vlibras-logo.png"))
                 .andExpect(jsonPath("$.pos").value("center"));
     }
 
@@ -53,12 +52,12 @@ class VlibrasPersonalizacaoControllerTests {
     }
 
     @Test
-    void naoDeveRefletirLogoRecebidaNaQuery() throws Exception {
+    void naoDeveRefletirCamposExtrasRecebidosNaQuery() throws Exception {
         mockMvc.perform(get("/api/vlibras/personalizacao")
-                        .param("logo", "https://malicioso.example/logo.png")
+                        .param("urlImagem", "https://malicioso.example/imagem.png")
                         .param("campoExtra", "FFFFFF"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.logo").value("https://example.com/vlibras-logo.png"))
+                .andExpect(jsonPath("$", not(hasKey("urlImagem"))))
                 .andExpect(jsonPath("$", not(hasKey("campoExtra"))));
     }
 }

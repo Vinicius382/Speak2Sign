@@ -1,6 +1,5 @@
 package com.speak2sign.controller;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -29,12 +28,6 @@ public class VlibrasPersonalizacaoController {
             "sobrancelhas", "#000000"
     );
 
-    private final String logoUrl;
-
-    public VlibrasPersonalizacaoController(@Value("${vlibras.logo-url}") String logoUrl) {
-        this.logoUrl = logoUrl;
-    }
-
     @GetMapping(value = "/personalizacao", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, String>> obterPersonalizacao(
             @RequestParam Map<String, String> parametros) {
@@ -47,7 +40,6 @@ public class VlibrasPersonalizacaoController {
         resposta.put("iris", normalizarHex(parametros.get("iris"), CORES_PADRAO.get("iris")));
         resposta.put("olhos", normalizarHex(parametros.get("olhos"), CORES_PADRAO.get("olhos")));
         resposta.put("sobrancelhas", normalizarHex(parametros.get("sobrancelhas"), CORES_PADRAO.get("sobrancelhas")));
-        resposta.put("logo", logoUrl);
         resposta.put("pos", "center");
 
         return ResponseEntity.ok()
