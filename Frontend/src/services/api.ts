@@ -2,10 +2,11 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const CHAVE_TOKEN = '@speak2sign_token';
+export const API_BASE_URL = 'https://speak2sign.onrender.com';
 let tokenAutenticacao: string | null = null;
 
 const api = axios.create({
-  baseURL: 'https://speak2sign.onrender.com',
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },

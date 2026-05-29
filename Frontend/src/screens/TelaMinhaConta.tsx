@@ -241,6 +241,13 @@ const TelaMinhaConta: React.FC = () => {
             aoMudar={(v) => setVelocidadeAvatar(v as VelocidadeAvatar)}
           />
           <View style={estilos.divisor} />
+          <ItemMenu
+            icone="color-palette-outline"
+            titulo="Personalizar Avatar"
+            subtitulo="Altere as cores do avatar VLibras"
+            aoClicar={() => navigation.navigate('PersonalizacaoVLibras')}
+          />
+          <View style={estilos.divisor} />
           <ItemToggle
             icone="moon-outline"
             titulo="Modo Escuro"

@@ -5,10 +5,12 @@ import React, {
   useState,
   useCallback,
   useEffect,
+  useMemo,
 } from 'react';
 import { useConfiguracoes } from './ConfiguracoesProvider';
 import { StyleSheet, View, LayoutRectangle } from 'react-native';
 import { WebView } from 'react-native-webview';
+import { montarUrlPersonalizacaoVLibras } from '../utils/vlibrasPersonalizacao';
 
 interface VLibrasContextType {
   pronto: boolean;
@@ -31,7 +33,14 @@ const VLibrasContext = createContext<VLibrasContextType>({
 export const useVLibras = () => useContext(VLibrasContext);
 
 // ─── HTML do VLibras (preload sem texto) ─────────────────
-const getVLibrasPreloadHTML = () => `
+const getVLibrasPreloadHTML = (personalizacaoUrl: string) => {
+  const vlibrasAppUrl = JSON.stringify('https://vlibras.gov.br/app');
+  const opcoesWidget = JSON.stringify({
+    position: 'B',
+    personalization: personalizacaoUrl,
+  });
+
+  return `
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -136,7 +145,7 @@ const getVLibrasPreloadHTML = () => `
   </script>
   <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
   <script>
-    new window.VLibras.Widget('https://vlibras.gov.br/app', {position: 'B'});
+    new window.VLibras.Widget(${vlibrasAppUrl}, ${opcoesWidget});
     var textToTranslate = '';
 
     function hideLoading() {
@@ -212,6 +221,7 @@ const getVLibrasPreloadHTML = () => `
 </body>
 </html>
 `;
+};
 
 // ─── Provider ────────────────────────────────────────────
 export const VLibrasProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -222,14 +232,23 @@ export const VLibrasProvider: React.FC<{ children: React.ReactNode }> = ({
   const [visivel, setVisivel] = useState(false);
   const [layout, setLayout] = useState<LayoutRectangle | null>(null);
   const { config } = useConfiguracoes();
+  const personalizacaoUrl = useMemo(
+    () => montarUrlPersonalizacaoVLibras(config.personalizacaoVLibras),
+    [config.personalizacaoVLibras]
+  );
+  const htmlVLibras = useMemo(
+    () => getVLibrasPreloadHTML(personalizacaoUrl),
+    [personalizacaoUrl]
+  );
 
   const traduzir = useCallback((texto: string) => {
     if (webViewRef.current) {
-      const t = texto.replace(/"/g, '\\"').replace(/\n/g, '\\n');
+      const textoJson = JSON.stringify(texto);
       const js = `
         var textEl = document.getElementById('translate-text');
-        if(textEl) textEl.textContent = "${t}";
-        textToTranslate = "${t}";
+        var novoTexto = ${textoJson};
+        if (textEl) textEl.textContent = novoTexto;
+        textToTranslate = novoTexto;
         doTranslate();
         true;
       `;
@@ -261,6 +280,10 @@ export const VLibrasProvider: React.FC<{ children: React.ReactNode }> = ({
       }
     } catch (e) { }
   }, []);
+
+  useEffect(() => {
+    setPronto(false);
+  }, [personalizacaoUrl]);
 
   useEffect(() => {
     if (pronto && webViewRef.current) {
@@ -322,9 +345,10 @@ export const VLibrasProvider: React.FC<{ children: React.ReactNode }> = ({
       {/* WebView do VLibras — sempre montada, visibilidade controlada */}
       <View style={webviewPositionStyle} pointerEvents={visivel ? 'auto' : 'none'}>
         <WebView
+          key={personalizacaoUrl}
           ref={webViewRef}
           style={estilos.webview}
-          source={{ html: getVLibrasPreloadHTML() }}
+          source={{ html: htmlVLibras }}
           javaScriptEnabled={true}
           domStorageEnabled={true}
           allowsInlineMediaPlayback={true}
