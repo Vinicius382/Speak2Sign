@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import {
   Alert,
+  Modal,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -12,12 +13,15 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import BotaoVoltar from '../components/BotaoVoltar';
 import {
+  type AvatarVLibras,
   type PersonalizacaoVLibras,
   personalizacaoVLibrasPadrao,
   useConfiguracoes,
 } from '../contexts/ConfiguracoesProvider';
 import type { Cores } from '../theme/cores';
 import { useCores } from '../theme/useCores';
+import VLibrasPreview from '../components/VLibrasPreview';
+import type { OpacidadeVLibras } from '../contexts/ConfiguracoesProvider';
 
 type CampoPersonalizacao = keyof PersonalizacaoVLibras;
 
@@ -73,13 +77,35 @@ const CAMPOS: CampoConfig[] = [
   },
 ];
 
+const OPACIDADES: { rotulo: string; valor: OpacidadeVLibras }[] = [
+  { rotulo: '0%', valor: 0 },
+  { rotulo: '25%', valor: 0.25 },
+  { rotulo: '50%', valor: 0.5 },
+  { rotulo: '75%', valor: 0.75 },
+  { rotulo: '100%', valor: 1 },
+];
+
+const AVATARES: { rotulo: string; valor: AvatarVLibras }[] = [
+  { rotulo: 'Guga', valor: 'guga' },
+  { rotulo: 'Ícaro', valor: 'icaro' },
+  { rotulo: 'Hozana', valor: 'hosana' },
+  { rotulo: 'Aleatório', valor: 'random' },
+];
+
 const TelaPersonalizacaoVLibras: React.FC = () => {
-  const { config, setPersonalizacaoVLibras, resetPersonalizacaoVLibras } = useConfiguracoes();
+  const {
+    config,
+    salvarPersonalizacaoVLibras,
+    resetPersonalizacaoVLibras,
+  } = useConfiguracoes();
   const { cores, estaEscuro, fatorFonte } = useCores();
   const estilos = useMemo(() => criarEstilos(cores, fatorFonte), [cores, fatorFonte]);
   const [personalizacao, setPersonalizacao] = useState<PersonalizacaoVLibras>(
     config.personalizacaoVLibras
   );
+  const [opacidade, setOpacidade] = useState<OpacidadeVLibras>(config.opacidadeVLibras);
+  const [avatar, setAvatar] = useState<AvatarVLibras>(config.avatarVLibras);
+  const [previewVisivel, setPreviewVisivel] = useState(false);
 
   const alterarCor = (campo: CampoPersonalizacao, cor: string) => {
     setPersonalizacao((atual) => ({
@@ -89,14 +115,16 @@ const TelaPersonalizacaoVLibras: React.FC = () => {
   };
 
   const salvar = () => {
-    setPersonalizacaoVLibras(personalizacao);
-    Alert.alert('Pronto!', 'As cores do avatar foram salvas.');
+    salvarPersonalizacaoVLibras(personalizacao, opacidade, avatar);
+    Alert.alert('Pronto!', 'A personalização do VLibras foi salva.');
   };
 
   const restaurarPadrao = () => {
     setPersonalizacao(personalizacaoVLibrasPadrao);
+    setOpacidade(1);
+    setAvatar('icaro');
     resetPersonalizacaoVLibras();
-    Alert.alert('Padrão restaurado', 'As cores do avatar voltaram ao padrão.');
+    Alert.alert('Padrão restaurado', 'A personalização do VLibras voltou ao padrão.');
   };
 
   return (
@@ -114,25 +142,63 @@ const TelaPersonalizacaoVLibras: React.FC = () => {
         showsVerticalScrollIndicator={false}
       >
         <View style={estilos.previewCard}>
-          <View style={estilos.avatarMiniatura}>
-            <View style={[estilos.cabeca, { backgroundColor: personalizacao.corpo }]}>
-              <View style={[estilos.cabelo, { backgroundColor: personalizacao.cabelo }]} />
-              <View style={estilos.olhosLinha}>
-                <View style={[estilos.olho, { backgroundColor: personalizacao.olhos }]}>
-                  <View style={[estilos.iris, { backgroundColor: personalizacao.iris }]} />
-                </View>
-                <View style={[estilos.olho, { backgroundColor: personalizacao.olhos }]}>
-                  <View style={[estilos.iris, { backgroundColor: personalizacao.iris }]} />
-                </View>
-              </View>
-              <View style={[estilos.sobrancelha, { backgroundColor: personalizacao.sobrancelhas }]} />
-            </View>
-            <View style={[estilos.camisa, { backgroundColor: personalizacao.camisa }]} />
-            <View style={[estilos.calca, { backgroundColor: personalizacao.calca }]} />
+          <View style={estilos.previewIcone}>
+            <Ionicons name="accessibility-outline" size={28} color={cores.iconeTeal} />
           </View>
           <View style={estilos.previewTexto}>
             <Text style={estilos.previewTitulo}>Avatar VLibras</Text>
-            <Text style={estilos.previewSubtitulo}>Cores aplicadas na próxima tradução</Text>
+            <Text style={estilos.previewSubtitulo}>Veja as mudanças no widget real antes de salvar</Text>
+          </View>
+          <TouchableOpacity
+            style={estilos.botaoVisualizar}
+            onPress={() => setPreviewVisivel(true)}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="eye-outline" size={18} color="#FFFFFF" />
+            <Text style={estilos.botaoVisualizarTexto}>Visualizar</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={estilos.secaoCard}>
+          <View style={estilos.campoContainer}>
+            <View style={estilos.campoCabecalho}>
+              <View style={estilos.iconeContainer}>
+                <Ionicons name="accessibility-outline" size={20} color={cores.iconeTeal} />
+              </View>
+              <View style={estilos.campoTituloContainer}>
+                <Text style={estilos.campoTitulo}>Avatar</Text>
+                <Text style={estilos.campoValor}>Modelo usado pelo widget VLibras</Text>
+              </View>
+            </View>
+
+            <View style={estilos.opcoesSegmentadas}>
+              {AVATARES.map((opcao) => {
+                const selecionada = avatar === opcao.valor;
+
+                return (
+                  <TouchableOpacity
+                    key={opcao.valor}
+                    style={[
+                      estilos.botaoSegmentado,
+                      selecionada && estilos.botaoSegmentadoAtivo,
+                    ]}
+                    onPress={() => setAvatar(opcao.valor)}
+                    activeOpacity={0.75}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: selecionada }}
+                  >
+                    <Text
+                      style={[
+                        estilos.botaoSegmentadoTexto,
+                        selecionada && estilos.botaoSegmentadoTextoAtivo,
+                      ]}
+                    >
+                      {opcao.rotulo}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
           </View>
         </View>
 
@@ -183,6 +249,49 @@ const TelaPersonalizacaoVLibras: React.FC = () => {
           ))}
         </View>
 
+        <View style={estilos.secaoCard}>
+          <View style={estilos.campoContainer}>
+            <View style={estilos.campoCabecalho}>
+              <View style={estilos.iconeContainer}>
+                <Ionicons name="layers-outline" size={20} color={cores.iconeTeal} />
+              </View>
+              <View style={estilos.campoTituloContainer}>
+                <Text style={estilos.campoTitulo}>Opacidade</Text>
+                <Text style={estilos.campoValor}>{Math.round(opacidade * 100)}%</Text>
+              </View>
+            </View>
+
+            <View style={estilos.opcoesSegmentadas}>
+              {OPACIDADES.map((opcao) => {
+                const selecionada = opacidade === opcao.valor;
+
+                return (
+                  <TouchableOpacity
+                    key={opcao.rotulo}
+                    style={[
+                      estilos.botaoSegmentado,
+                      selecionada && estilos.botaoSegmentadoAtivo,
+                    ]}
+                    onPress={() => setOpacidade(opcao.valor)}
+                    activeOpacity={0.75}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: selecionada }}
+                  >
+                    <Text
+                      style={[
+                        estilos.botaoSegmentadoTexto,
+                        selecionada && estilos.botaoSegmentadoTextoAtivo,
+                      ]}
+                    >
+                      {opcao.rotulo}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </View>
+        </View>
+
         <TouchableOpacity
           style={estilos.botaoSalvar}
           onPress={salvar}
@@ -201,6 +310,35 @@ const TelaPersonalizacaoVLibras: React.FC = () => {
           <Text style={estilos.botaoRestaurarTexto}>Restaurar padrão</Text>
         </TouchableOpacity>
       </ScrollView>
+
+      <Modal
+        visible={previewVisivel}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setPreviewVisivel(false)}
+      >
+        <View style={estilos.modalOverlay}>
+          <View style={estilos.modalConteudo}>
+            <View style={estilos.modalCabecalho}>
+              <Text style={estilos.modalTitulo}>Visualizar avatar</Text>
+              <TouchableOpacity
+                style={estilos.modalFechar}
+                onPress={() => setPreviewVisivel(false)}
+                activeOpacity={0.75}
+              >
+                <Ionicons name="close" size={22} color={cores.textoPrincipal} />
+              </TouchableOpacity>
+            </View>
+            <View style={estilos.previewWebview}>
+              <VLibrasPreview
+                personalizacao={personalizacao}
+                avatar={avatar}
+                opacidade={opacidade}
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -243,66 +381,33 @@ const criarEstilos = (cores: Cores, fatorFonte: number = 1) => StyleSheet.create
     shadowRadius: 10,
     elevation: 3,
   },
-  avatarMiniatura: {
-    width: 78,
-    alignItems: 'center',
-    marginRight: 16,
-  },
-  cabeca: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
+  previewIcone: {
+    width: 52,
+    height: 52,
+    borderRadius: 16,
+    backgroundColor: cores.fundoIcone,
     alignItems: 'center',
     justifyContent: 'center',
-    overflow: 'hidden',
+    marginRight: 14,
   },
-  cabelo: {
-    position: 'absolute',
-    top: 0,
-    width: 48,
-    height: 16,
-    borderBottomLeftRadius: 18,
-    borderBottomRightRadius: 18,
-  },
-  olhosLinha: {
+  botaoVisualizar: {
+    minHeight: 38,
     flexDirection: 'row',
-    gap: 7,
-    marginTop: 8,
-  },
-  olho: {
-    width: 9,
-    height: 9,
-    borderRadius: 5,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: cores.destaque,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    gap: 6,
   },
-  iris: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-  },
-  sobrancelha: {
-    position: 'absolute',
-    top: 16,
-    width: 26,
-    height: 3,
-    borderRadius: 2,
-  },
-  camisa: {
-    width: 58,
-    height: 34,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    marginTop: -2,
-  },
-  calca: {
-    width: 46,
-    height: 24,
-    borderBottomLeftRadius: 10,
-    borderBottomRightRadius: 10,
+  botaoVisualizarTexto: {
+    color: '#FFFFFF',
+    fontSize: Math.round(13 * fatorFonte),
+    fontWeight: '700',
   },
   previewTexto: {
     flex: 1,
+    marginRight: 12,
   },
   previewTitulo: {
     color: cores.textoPrincipal,
@@ -392,6 +497,36 @@ const criarEstilos = (cores: Cores, fatorFonte: number = 1) => StyleSheet.create
     backgroundColor: cores.divisor,
     marginHorizontal: 16,
   },
+  opcoesSegmentadas: {
+    flexDirection: 'row',
+    backgroundColor: cores.seletorFundo,
+    borderRadius: 12,
+    padding: 3,
+  },
+  botaoSegmentado: {
+    flex: 1,
+    minHeight: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 10,
+  },
+  botaoSegmentadoAtivo: {
+    backgroundColor: cores.superficie,
+    shadowColor: cores.sombra,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  botaoSegmentadoTexto: {
+    color: cores.textoSecundario,
+    fontSize: Math.round(12 * fatorFonte),
+    fontWeight: '600',
+  },
+  botaoSegmentadoTextoAtivo: {
+    color: cores.destaque,
+    fontWeight: '800',
+  },
   botaoSalvar: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -422,6 +557,45 @@ const criarEstilos = (cores: Cores, fatorFonte: number = 1) => StyleSheet.create
     color: cores.iconeTeal,
     fontSize: Math.round(16 * fatorFonte),
     fontWeight: '700',
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0,0,0,0.45)',
+  },
+  modalConteudo: {
+    height: '78%',
+    backgroundColor: cores.fundo,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 16,
+  },
+  modalCabecalho: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  modalTitulo: {
+    color: cores.textoPrincipal,
+    fontSize: Math.round(18 * fatorFonte),
+    fontWeight: '700',
+  },
+  modalFechar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: cores.superficie,
+  },
+  previewWebview: {
+    flex: 1,
+    overflow: 'hidden',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: cores.inputBorda,
+    backgroundColor: '#FFFFFF',
   },
 });
 

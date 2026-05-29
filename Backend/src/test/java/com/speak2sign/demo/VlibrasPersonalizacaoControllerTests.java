@@ -33,7 +33,8 @@ class VlibrasPersonalizacaoControllerTests {
                 .andExpect(jsonPath("$.corpo").value("#C18471"))
                 .andExpect(jsonPath("$.iris").value("#000000"))
                 .andExpect(jsonPath("$.olhos").value("#FFFFFF"))
-                .andExpect(jsonPath("$.sobrancelhas").value("#000000"))
+                .andExpect(jsonPath("$.sombrancelhas").value("#000000"))
+                .andExpect(jsonPath("$", not(hasKey("sobrancelhas"))))
                 .andExpect(jsonPath("$.pos").value("center"));
     }
 
@@ -43,21 +44,34 @@ class VlibrasPersonalizacaoControllerTests {
                         .param("calca", "abcdef")
                         .param("camisa", "#123456")
                         .param("cabelo", "invalido")
-                        .param("corpo", "C18471"))
+                        .param("corpo", "C18471")
+                        .param("sombrancelhas", "654321"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.calca").value("#ABCDEF"))
                 .andExpect(jsonPath("$.camisa").value("#123456"))
                 .andExpect(jsonPath("$.cabelo").value("#000000"))
-                .andExpect(jsonPath("$.corpo").value("#C18471"));
+                .andExpect(jsonPath("$.corpo").value("#C18471"))
+                .andExpect(jsonPath("$.sombrancelhas").value("#654321"));
+    }
+
+    @Test
+    void deveAceitarSobrancelhasComoAliasLegadoDeEntrada() throws Exception {
+        mockMvc.perform(get("/api/vlibras/personalizacao")
+                        .param("sobrancelhas", "fedcba"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.sombrancelhas").value("#FEDCBA"))
+                .andExpect(jsonPath("$", not(hasKey("sobrancelhas"))));
     }
 
     @Test
     void naoDeveRefletirCamposExtrasRecebidosNaQuery() throws Exception {
         mockMvc.perform(get("/api/vlibras/personalizacao")
                         .param("urlImagem", "https://malicioso.example/imagem.png")
-                        .param("campoExtra", "FFFFFF"))
+                        .param("campoExtra", "FFFFFF")
+                        .param("logo", "https://malicioso.example/logo.png"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", not(hasKey("urlImagem"))))
-                .andExpect(jsonPath("$", not(hasKey("campoExtra"))));
+                .andExpect(jsonPath("$", not(hasKey("campoExtra"))))
+                .andExpect(jsonPath("$", not(hasKey("logo"))));
     }
 }

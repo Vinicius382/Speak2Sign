@@ -17,6 +17,8 @@ import java.util.regex.Pattern;
 public class VlibrasPersonalizacaoController {
 
     private static final Pattern HEX_PATTERN = Pattern.compile("^#?[0-9A-Fa-f]{6}$");
+    private static final String CAMPO_SOMBRANCELHAS = "sombrancelhas";
+    private static final String CAMPO_SOBRANCELHAS_LEGADO = "sobrancelhas";
 
     private static final Map<String, String> CORES_PADRAO = Map.of(
             "calca", "#201E62",
@@ -25,7 +27,7 @@ public class VlibrasPersonalizacaoController {
             "corpo", "#C18471",
             "iris", "#000000",
             "olhos", "#FFFFFF",
-            "sobrancelhas", "#000000"
+            CAMPO_SOMBRANCELHAS, "#000000"
     );
 
     @GetMapping(value = "/personalizacao", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -39,7 +41,13 @@ public class VlibrasPersonalizacaoController {
         resposta.put("corpo", normalizarHex(parametros.get("corpo"), CORES_PADRAO.get("corpo")));
         resposta.put("iris", normalizarHex(parametros.get("iris"), CORES_PADRAO.get("iris")));
         resposta.put("olhos", normalizarHex(parametros.get("olhos"), CORES_PADRAO.get("olhos")));
-        resposta.put("sobrancelhas", normalizarHex(parametros.get("sobrancelhas"), CORES_PADRAO.get("sobrancelhas")));
+        resposta.put(
+                CAMPO_SOMBRANCELHAS,
+                normalizarHex(
+                        obterParametroSobrancelhas(parametros),
+                        CORES_PADRAO.get(CAMPO_SOMBRANCELHAS)
+                )
+        );
         resposta.put("pos", "center");
 
         return ResponseEntity.ok()
@@ -55,5 +63,14 @@ public class VlibrasPersonalizacaoController {
 
         String semHash = valor.replace("#", "");
         return "#" + semHash.toUpperCase();
+    }
+
+    private String obterParametroSobrancelhas(Map<String, String> parametros) {
+        String valor = parametros.get(CAMPO_SOMBRANCELHAS);
+        if (valor != null) {
+            return valor;
+        }
+
+        return parametros.get(CAMPO_SOBRANCELHAS_LEGADO);
     }
 }

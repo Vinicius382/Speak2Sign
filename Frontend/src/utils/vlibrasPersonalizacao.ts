@@ -11,6 +11,14 @@ const CAMPOS_PERSONALIZACAO: (keyof PersonalizacaoVLibras)[] = [
   'sobrancelhas',
 ];
 
+const obterNomeParametroVLibras = (campo: keyof PersonalizacaoVLibras): string => {
+  if (campo === 'sobrancelhas') {
+    return 'sombrancelhas';
+  }
+
+  return campo;
+};
+
 export const normalizarHex = (cor: string): string => {
   const semHash = cor.trim().replace(/^#/, '').toUpperCase();
 
@@ -27,7 +35,10 @@ export const montarUrlPersonalizacaoVLibras = (
   const parametros = new URLSearchParams();
 
   CAMPOS_PERSONALIZACAO.forEach((campo) => {
-    parametros.set(campo, normalizarHex(personalizacao[campo]).replace('#', ''));
+    parametros.set(
+      obterNomeParametroVLibras(campo),
+      normalizarHex(personalizacao[campo]).replace('#', '')
+    );
   });
 
   return `${API_BASE_URL}/api/vlibras/personalizacao?${parametros.toString()}`;

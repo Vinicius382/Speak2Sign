@@ -4,6 +4,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // Tipos
 export type TamanhoFonte = 'pequeno' | 'medio' | 'grande';
 export type VelocidadeAvatar = 'lenta' | 'normal' | 'rapida';
+export type AvatarVLibras = 'icaro' | 'hosana' | 'guga' | 'random';
+export type OpacidadeVLibras = 0 | 0.25 | 0.5 | 0.75 | 1;
 
 export interface PersonalizacaoVLibras {
   calca: string;
@@ -21,15 +23,26 @@ export interface Configuracoes {
   velocidadeAvatar: VelocidadeAvatar;
   sincronizacaoAtivada: boolean;
   personalizacaoVLibras: PersonalizacaoVLibras;
+  avatarVLibras: AvatarVLibras;
+  opacidadeVLibras: OpacidadeVLibras;
+  revisaoVLibras: number;
 }
 
 interface ConfiguracoesContexto {
   config: Configuracoes;
+  configuracoesCarregadas: boolean;
   setTemaEscuro: (valor: boolean) => void;
   setTamanhoFonte: (valor: TamanhoFonte) => void;
   setVelocidadeAvatar: (valor: VelocidadeAvatar) => void;
   setSincronizacaoAtivada: (valor: boolean) => void;
   setPersonalizacaoVLibras: (valor: PersonalizacaoVLibras) => void;
+  setAvatarVLibras: (valor: AvatarVLibras) => void;
+  setOpacidadeVLibras: (valor: OpacidadeVLibras) => void;
+  salvarPersonalizacaoVLibras: (
+    personalizacao: PersonalizacaoVLibras,
+    opacidade: OpacidadeVLibras,
+    avatar?: AvatarVLibras
+  ) => void;
   resetPersonalizacaoVLibras: () => void;
 }
 
@@ -51,6 +64,9 @@ const configPadrao: Configuracoes = {
   velocidadeAvatar: 'normal',
   sincronizacaoAtivada: true,
   personalizacaoVLibras: personalizacaoVLibrasPadrao,
+  avatarVLibras: 'icaro',
+  opacidadeVLibras: 1,
+  revisaoVLibras: 0,
 };
 
 const CAMPOS_PERSONALIZACAO: (keyof PersonalizacaoVLibras)[] = [
@@ -62,6 +78,9 @@ const CAMPOS_PERSONALIZACAO: (keyof PersonalizacaoVLibras)[] = [
   'olhos',
   'sobrancelhas',
 ];
+
+const AVATARES_VLIBRAS: AvatarVLibras[] = ['icaro', 'hosana', 'guga', 'random'];
+const OPACIDADES_VLIBRAS: OpacidadeVLibras[] = [0, 0.25, 0.5, 0.75, 1];
 
 const normalizarCorHex = (valor: unknown, padrao: string): string => {
   if (typeof valor !== 'string') {
@@ -88,6 +107,22 @@ const normalizarPersonalizacaoVLibras = (
   return personalizacao;
 };
 
+const normalizarAvatarVLibras = (valor: unknown): AvatarVLibras => {
+  if (typeof valor === 'string' && AVATARES_VLIBRAS.includes(valor as AvatarVLibras)) {
+    return valor as AvatarVLibras;
+  }
+
+  return configPadrao.avatarVLibras;
+};
+
+const normalizarOpacidadeVLibras = (valor: unknown): OpacidadeVLibras => {
+  if (typeof valor === 'number' && OPACIDADES_VLIBRAS.includes(valor as OpacidadeVLibras)) {
+    return valor as OpacidadeVLibras;
+  }
+
+  return configPadrao.opacidadeVLibras;
+};
+
 const mesclarConfiguracoes = (valor: unknown): Configuracoes => {
   if (!valor || typeof valor !== 'object') {
     return configPadrao;
@@ -99,6 +134,9 @@ const mesclarConfiguracoes = (valor: unknown): Configuracoes => {
     ...configPadrao,
     ...armazenada,
     personalizacaoVLibras: normalizarPersonalizacaoVLibras(armazenada.personalizacaoVLibras),
+    avatarVLibras: normalizarAvatarVLibras(armazenada.avatarVLibras),
+    opacidadeVLibras: normalizarOpacidadeVLibras(armazenada.opacidadeVLibras),
+    revisaoVLibras: typeof armazenada.revisaoVLibras === 'number' ? armazenada.revisaoVLibras : 0,
   };
 };
 
@@ -114,6 +152,7 @@ export const useConfiguracoes = (): ConfiguracoesContexto => {
 
 export const ConfiguracoesProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [config, setConfig] = useState<Configuracoes>(configPadrao);
+  const [configuracoesCarregadas, setConfiguracoesCarregadas] = useState(false);
 
   // Carregar configurações salvas
   useEffect(() => {
@@ -125,6 +164,8 @@ export const ConfiguracoesProvider: React.FC<{ children: React.ReactNode }> = ({
         }
       } catch (e) {
         console.error('Erro ao carregar configurações:', e);
+      } finally {
+        setConfiguracoesCarregadas(true);
       }
     };
     carregar();
@@ -159,6 +200,37 @@ export const ConfiguracoesProvider: React.FC<{ children: React.ReactNode }> = ({
     salvarConfig({
       ...config,
       personalizacaoVLibras: normalizarPersonalizacaoVLibras(valor),
+      revisaoVLibras: config.revisaoVLibras + 1,
+    });
+  };
+
+  const setAvatarVLibras = (valor: AvatarVLibras) => {
+    salvarConfig({
+      ...config,
+      avatarVLibras: normalizarAvatarVLibras(valor),
+      revisaoVLibras: config.revisaoVLibras + 1,
+    });
+  };
+
+  const setOpacidadeVLibras = (valor: OpacidadeVLibras) => {
+    salvarConfig({
+      ...config,
+      opacidadeVLibras: normalizarOpacidadeVLibras(valor),
+      revisaoVLibras: config.revisaoVLibras + 1,
+    });
+  };
+
+  const salvarPersonalizacaoVLibras = (
+    personalizacao: PersonalizacaoVLibras,
+    opacidade: OpacidadeVLibras,
+    avatar?: AvatarVLibras
+  ) => {
+    salvarConfig({
+      ...config,
+      personalizacaoVLibras: normalizarPersonalizacaoVLibras(personalizacao),
+      opacidadeVLibras: normalizarOpacidadeVLibras(opacidade),
+      avatarVLibras: avatar ? normalizarAvatarVLibras(avatar) : config.avatarVLibras,
+      revisaoVLibras: config.revisaoVLibras + 1,
     });
   };
 
@@ -166,6 +238,9 @@ export const ConfiguracoesProvider: React.FC<{ children: React.ReactNode }> = ({
     salvarConfig({
       ...config,
       personalizacaoVLibras: personalizacaoVLibrasPadrao,
+      avatarVLibras: configPadrao.avatarVLibras,
+      opacidadeVLibras: configPadrao.opacidadeVLibras,
+      revisaoVLibras: config.revisaoVLibras + 1,
     });
   };
 
@@ -173,11 +248,15 @@ export const ConfiguracoesProvider: React.FC<{ children: React.ReactNode }> = ({
     <ConfiguracoesContext.Provider
       value={{
         config,
+        configuracoesCarregadas,
         setTemaEscuro,
         setTamanhoFonte,
         setVelocidadeAvatar,
         setSincronizacaoAtivada,
         setPersonalizacaoVLibras,
+        setAvatarVLibras,
+        setOpacidadeVLibras,
+        salvarPersonalizacaoVLibras,
         resetPersonalizacaoVLibras,
       }}
     >

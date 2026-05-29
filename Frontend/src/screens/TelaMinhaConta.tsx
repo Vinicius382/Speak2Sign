@@ -19,7 +19,7 @@ import type { Cores } from '../theme/cores';
 import { useAuth } from '../contexts/AuthProvider';
 import { useConfiguracoes } from '../contexts/ConfiguracoesProvider';
 import { useHistoricoFavoritos } from '../contexts/HistoricoFavoritosProvider';
-import type { TamanhoFonte, VelocidadeAvatar } from '../contexts/ConfiguracoesProvider';
+import type { TamanhoFonte } from '../contexts/ConfiguracoesProvider';
 import BotaoVoltar from '../components/BotaoVoltar';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -33,7 +33,6 @@ const TelaMinhaConta: React.FC = () => {
     config,
     setTemaEscuro,
     setTamanhoFonte,
-    setVelocidadeAvatar,
     setSincronizacaoAtivada,
   } = useConfiguracoes();
   const { limparDadosLocais } = useHistoricoFavoritos();
@@ -229,22 +228,10 @@ const TelaMinhaConta: React.FC = () => {
             aoMudar={setSincronizacaoAtivada}
           />
           <View style={estilos.divisor} />
-          <ItemSeletor
-            icone="speedometer-outline"
-            titulo="Velocidade do Avatar"
-            opcoes={[
-              { rotulo: 'Lenta', valor: 'lenta' },
-              { rotulo: 'Normal', valor: 'normal' },
-              { rotulo: 'Rápida', valor: 'rapida' },
-            ]}
-            valorAtual={config.velocidadeAvatar}
-            aoMudar={(v) => setVelocidadeAvatar(v as VelocidadeAvatar)}
-          />
-          <View style={estilos.divisor} />
           <ItemMenu
             icone="color-palette-outline"
-            titulo="Personalizar Avatar"
-            subtitulo="Altere as cores do avatar VLibras"
+            titulo="Personalização VLibras"
+            subtitulo="Cores, opacidade e avatar"
             aoClicar={() => navigation.navigate('PersonalizacaoVLibras')}
           />
           <View style={estilos.divisor} />
