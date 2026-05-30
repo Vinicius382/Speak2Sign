@@ -28,6 +28,7 @@
     },
     "plugins": [
       "expo-font",
+      "./plugins/withAndroidProcessText",
       [
         "expo-speech-recognition",
         {
