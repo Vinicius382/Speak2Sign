@@ -21,7 +21,10 @@
         "foregroundImage": "./assets/icon.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.speak2sign"
+      "package": "com.speak2sign",
+      "permissions": [
+        "android.permission.CAMERA"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -29,6 +32,23 @@
     "plugins": [
       "expo-font",
       "./plugins/withAndroidProcessText",
+      "onnxruntime-react-native",
+      "./plugins/withOnnxruntimePackageRegistration",
+      [
+        "react-native-vision-camera",
+        {
+          "cameraPermissionText": "Permitir que o Speak2Sign use a câmera para reconhecer letras em Libras.",
+          "enableMicrophonePermission": false
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "minSdkVersion": 26
+          }
+        }
+      ],
       [
         "expo-speech-recognition",
         {

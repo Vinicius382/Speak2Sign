@@ -41,6 +41,8 @@ scripts/start-expo-dev.js
 
 # local Gradle cache
 .gradle-user-home/
+packages/react-native-mediapipe-hands/android/.gradle/
+packages/react-native-mediapipe-hands/android/build/
 
 # generated native folders
 /ios

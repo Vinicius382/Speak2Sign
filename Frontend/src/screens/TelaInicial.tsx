@@ -25,6 +25,7 @@ const TelaInicial: React.FC = () => {
 
   const navegarParaFavoritos = () => navigation.navigate('Favoritos');
   const navegarParaHistorico = () => navigation.navigate('Historico');
+  const navegarParaReconhecimentoLibras = () => navigation.navigate('ReconhecimentoLibras');
 
   return (
     <SafeAreaView style={estilos.container} edges={['top']}>
@@ -65,6 +66,30 @@ const TelaInicial: React.FC = () => {
             <Text style={estilos.cardPrincipalTitulo}>Texto ou Áudio para Libras</Text>
             <Text style={estilos.cardPrincipalDescricao}>
               Use microfone ou teclado para gerar interpretação em Libras em tempo real.
+            </Text>
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={estilos.cardReconhecimento}
+          onPress={navegarParaReconhecimentoLibras}
+          activeOpacity={0.7}
+        >
+          <View style={estilos.cardPrincipalIconeContainer}>
+            <MaterialCommunityIcons
+              name="gesture-tap"
+              size={30}
+              color={cores.iconeTeal}
+            />
+            <View style={estilos.micBadge}>
+              <Ionicons name="camera-outline" size={10} color={cores.iconeTeal} />
+            </View>
+          </View>
+
+          <View style={estilos.cardPrincipalTexto}>
+            <Text style={estilos.cardPrincipalTitulo}>Reconhecer letras em Libras</Text>
+            <Text style={estilos.cardPrincipalDescricao}>
+              Use a câmera para identificar letras do alfabeto manual em tempo real.
             </Text>
           </View>
         </TouchableOpacity>
@@ -143,6 +168,20 @@ const criarEstilos = (cores: Cores, fatorFonte: number = 1) => StyleSheet.create
   },
 
   cardPrincipal: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: cores.superficie,
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 12,
+    marginHorizontal: 20,
+    shadowColor: cores.sombra,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    elevation: 3,
+  },
+  cardReconhecimento: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: cores.superficie,

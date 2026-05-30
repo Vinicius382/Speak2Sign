@@ -17,6 +17,7 @@ import TelaMinhaConta from '../screens/TelaMinhaConta';
 import TelaEditarPerfil from '../screens/TelaEditarPerfil';
 import TelaAlterarSenha from '../screens/TelaAlterarSenha';
 import TelaDicionario from '../screens/TelaDicionario';
+import TelaReconhecimentoLibras from '../screens/TelaReconhecimentoLibras';
 import { useAuth } from '../contexts/AuthProvider';
 import { cores } from '../theme/cores';
 
@@ -30,6 +31,7 @@ export type RootStackParamList = {
   NovaTraducao: undefined;
   DigitarMensagem: undefined;
   FalarMensagem: undefined;
+  ReconhecimentoLibras: undefined;
   ResultadoLibras: { texto: string; registrarHistorico?: boolean };
   Historico: undefined;
   Favoritos: undefined;
@@ -74,6 +76,7 @@ const NavegacaoPrincipal: React.FC = () => {
       <Stack.Screen name="NovaTraducao" component={TelaNovaTraducao} />
       <Stack.Screen name="DigitarMensagem" component={TelaDigitarMensagem} />
       <Stack.Screen name="FalarMensagem" component={TelaFalarMensagem} />
+      <Stack.Screen name="ReconhecimentoLibras" component={TelaReconhecimentoLibras} />
       <Stack.Screen name="ResultadoLibras" component={TelaResultadoLibras} />
       <Stack.Screen name="Historico" component={TelaHistorico} />
       <Stack.Screen name="Favoritos" component={TelaFavoritos} />
