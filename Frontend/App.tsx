@@ -67,7 +67,7 @@ export default function App() {
 
     navigationRef.navigate('ResultadoLibras', {
       texto,
-      registrarHistorico: true,
+      registrarHistorico: false,
     });
   }, []);
 
