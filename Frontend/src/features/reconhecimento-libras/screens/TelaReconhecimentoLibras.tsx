@@ -22,7 +22,7 @@ export const TelaReconhecimentoLibras = () => {
         barStyle={estaEscuro ? 'light-content' : 'dark-content'}
       />
       <View style={styles.header}>
-        <BotaoVoltar comFundo />
+        <BotaoVoltar />
         <View style={styles.headerText}>
           <Text style={styles.title}>Reconhecer letras</Text>
           <Text style={styles.subtitle}>Libras em tempo real</Text>

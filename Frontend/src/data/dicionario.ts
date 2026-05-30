@@ -3,7 +3,6 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 export type NomeIconeDicionario = keyof typeof MaterialCommunityIcons.glyphMap;
 
 export type CategoriaDicionarioId =
-  | 'alfabeto'
   | 'saudacoes'
   | 'sentimentos'
   | 'transporte'
@@ -27,38 +26,6 @@ export type CategoriaDicionario = {
 };
 
 export const categoriasDicionario: CategoriaDicionario[] = [
-  {
-    id: 'alfabeto',
-    titulo: 'Alfabeto',
-    itens: [
-      { id: 'letra-a', texto: 'A', icone: 'alphabetical' },
-      { id: 'letra-b', texto: 'B', icone: 'alphabetical' },
-      { id: 'letra-c', texto: 'C', icone: 'alphabetical' },
-      { id: 'letra-d', texto: 'D', icone: 'alphabetical' },
-      { id: 'letra-e', texto: 'E', icone: 'alphabetical' },
-      { id: 'letra-f', texto: 'F', icone: 'alphabetical' },
-      { id: 'letra-g', texto: 'G', icone: 'alphabetical' },
-      { id: 'letra-h', texto: 'H', icone: 'alphabetical' },
-      { id: 'letra-i', texto: 'I', icone: 'alphabetical' },
-      { id: 'letra-j', texto: 'J', icone: 'alphabetical' },
-      { id: 'letra-k', texto: 'K', icone: 'alphabetical' },
-      { id: 'letra-l', texto: 'L', icone: 'alphabetical' },
-      { id: 'letra-m', texto: 'M', icone: 'alphabetical' },
-      { id: 'letra-n', texto: 'N', icone: 'alphabetical' },
-      { id: 'letra-o', texto: 'O', icone: 'alphabetical' },
-      { id: 'letra-p', texto: 'P', icone: 'alphabetical' },
-      { id: 'letra-q', texto: 'Q', icone: 'alphabetical' },
-      { id: 'letra-r', texto: 'R', icone: 'alphabetical' },
-      { id: 'letra-s', texto: 'S', icone: 'alphabetical' },
-      { id: 'letra-t', texto: 'T', icone: 'alphabetical' },
-      { id: 'letra-u', texto: 'U', icone: 'alphabetical' },
-      { id: 'letra-v', texto: 'V', icone: 'alphabetical' },
-      { id: 'letra-w', texto: 'W', icone: 'alphabetical' },
-      { id: 'letra-x', texto: 'X', icone: 'alphabetical' },
-      { id: 'letra-y', texto: 'Y', icone: 'alphabetical' },
-      { id: 'letra-z', texto: 'Z', icone: 'alphabetical' },
-    ],
-  },
   {
     id: 'saudacoes',
     titulo: 'Saudações',
