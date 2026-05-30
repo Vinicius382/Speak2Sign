@@ -32,7 +32,6 @@ public class SecurityConfig {
                                 "/api/usuarios/login",
                                 "/api/usuarios/esqueci-senha",
                                 "/api/usuarios/redefinir-senha",
-                                "/api/vlibras/personalizacao",
                                 "/api/ping",
                                 "/vlibras/**",
                                 "/v3/api-docs/**",

@@ -31,12 +31,13 @@ type ResultadoRouteProp = RouteProp<RootStackParamList, 'ResultadoLibras'>;
 const TelaResultadoLibras: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<ResultadoRouteProp>();
-  const { texto } = route.params;
+  const { texto, registrarHistorico } = route.params;
   const { pronto, traduzir, mostrar, esconder, definirLayout } = useVLibras();
-  const { alternarFavorito, ehFavorito } = useHistoricoFavoritos();
+  const { adicionarAoHistorico, alternarFavorito, ehFavorito } = useHistoricoFavoritos();
   const { config, setAvatarVLibras, setVelocidadeAvatar } = useConfiguracoes();
   const cardRef = useRef<View>(null);
   const traduziuRef = useRef(false);
+  const registrouHistoricoRef = useRef(false);
   const [ajustesVisiveis, setAjustesVisiveis] = useState(false);
 
   const { cores, fatorFonte } = useCores();
@@ -80,7 +81,18 @@ const TelaResultadoLibras: React.FC = () => {
 
   useEffect(() => {
     traduziuRef.current = false;
-  }, [config.avatarVLibras, config.opacidadeVLibras, config.personalizacaoVLibras]);
+  }, [config.avatarVLibras]);
+
+  useEffect(() => {
+    registrouHistoricoRef.current = false;
+  }, [registrarHistorico, texto]);
+
+  useEffect(() => {
+    if (registrarHistorico && !registrouHistoricoRef.current) {
+      registrouHistoricoRef.current = true;
+      adicionarAoHistorico(texto, 'texto');
+    }
+  }, [adicionarAoHistorico, registrarHistorico, texto]);
 
   // Mede a posição do card e informa ao Provider
   const handleCardLayout = () => {
@@ -237,18 +249,6 @@ const TelaResultadoLibras: React.FC = () => {
               </View>
             </View>
 
-            <TouchableOpacity
-              style={estilos.botaoPersonalizacaoCompleta}
-              onPress={() => {
-                setAjustesVisiveis(false);
-                navigation.navigate('PersonalizacaoVLibras');
-              }}
-              activeOpacity={0.8}
-            >
-              <Ionicons name="color-palette-outline" size={18} color={cores.iconeTeal} />
-              <Text style={estilos.botaoPersonalizacaoCompletaTexto}>Personalização completa</Text>
-              <Ionicons name="chevron-forward" size={18} color={cores.textoSuave} />
-            </TouchableOpacity>
           </TouchableOpacity>
         </TouchableOpacity>
       </Modal>
@@ -283,25 +283,6 @@ const criarEstilos = (cores: Cores, fatorFonte: number = 1) => StyleSheet.create
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  botaoPersonalizacaoCompleta: {
-    minHeight: 48,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: cores.superficie,
-    borderWidth: 1,
-    borderColor: cores.inputBorda,
-    borderRadius: 12,
-    marginTop: 18,
-    paddingHorizontal: 14,
-    gap: 8,
-  },
-  botaoPersonalizacaoCompletaTexto: {
-    color: cores.iconeTeal,
-    flex: 1,
-    fontSize: Math.round(14 * fatorFonte),
-    fontWeight: '700',
   },
   ajusteLinha: {
     marginTop: 16,

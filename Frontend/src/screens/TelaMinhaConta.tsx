@@ -228,13 +228,6 @@ const TelaMinhaConta: React.FC = () => {
             aoMudar={setSincronizacaoAtivada}
           />
           <View style={estilos.divisor} />
-          <ItemMenu
-            icone="color-palette-outline"
-            titulo="Personalização VLibras"
-            subtitulo="Cores, opacidade e avatar"
-            aoClicar={() => navigation.navigate('PersonalizacaoVLibras')}
-          />
-          <View style={estilos.divisor} />
           <ItemToggle
             icone="moon-outline"
             titulo="Modo Escuro"

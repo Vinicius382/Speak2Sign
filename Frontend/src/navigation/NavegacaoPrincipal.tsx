@@ -17,7 +17,6 @@ import TelaMinhaConta from '../screens/TelaMinhaConta';
 import TelaEditarPerfil from '../screens/TelaEditarPerfil';
 import TelaAlterarSenha from '../screens/TelaAlterarSenha';
 import TelaDicionario from '../screens/TelaDicionario';
-import TelaPersonalizacaoVLibras from '../screens/TelaPersonalizacaoVLibras';
 import { useAuth } from '../contexts/AuthProvider';
 import { cores } from '../theme/cores';
 
@@ -31,14 +30,13 @@ export type RootStackParamList = {
   NovaTraducao: undefined;
   DigitarMensagem: undefined;
   FalarMensagem: undefined;
-  ResultadoLibras: { texto: string };
+  ResultadoLibras: { texto: string; registrarHistorico?: boolean };
   Historico: undefined;
   Favoritos: undefined;
   Dicionario: undefined;
   MinhaConta: undefined;
   EditarPerfil: undefined;
   AlterarSenha: undefined;
-  PersonalizacaoVLibras: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -83,7 +81,6 @@ const NavegacaoPrincipal: React.FC = () => {
       <Stack.Screen name="MinhaConta" component={TelaMinhaConta} />
       <Stack.Screen name="EditarPerfil" component={TelaEditarPerfil} />
       <Stack.Screen name="AlterarSenha" component={TelaAlterarSenha} />
-      <Stack.Screen name="PersonalizacaoVLibras" component={TelaPersonalizacaoVLibras} />
     </Stack.Navigator>
   );
 };
